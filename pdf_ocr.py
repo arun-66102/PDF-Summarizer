@@ -10,7 +10,7 @@ def extract_text_from_pdf(pdf_path):
     full_text = ""
     for page in doc:
         # Use sort=True for better reading order in complex layouts
-        full_text += page.get_text("text", sort=True) 
+        full_text += page.get_text("text", sort=True)
     doc.close()
     return full_text
 
