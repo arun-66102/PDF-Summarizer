@@ -90,6 +90,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-Your Name - [@your_twitter](https://twitter.com/your_twitter)
+Arunkumar - [@LinkedIn](https://www.linkedin.com/in/arunkumar-rathinasamy-844085290/)
 
-Project Link: [https://github.com/yourusername/PDF-Summarizer](https://github.com/yourusername/PDF-Summarizer)
+Project Link: [https://github.com/yourusername/PDF-Summarizer](https://github.com/arun-66102/PDF-Summarizer)
