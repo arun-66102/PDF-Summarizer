@@ -44,9 +44,8 @@ def ocr_text_from_pdf(pdf_path):
         ocr_text += text + "\n"
     return ocr_text
 
-
 # Example usage:
-file_path = "sample.pdf"
+file_path = "scanned.pdf"
 text_content = extract_text_from_pdf(file_path)
 
 # Check if OCR is needed
