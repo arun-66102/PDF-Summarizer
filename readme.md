@@ -92,4 +92,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 Arunkumar - [@LinkedIn](https://www.linkedin.com/in/arunkumar-rathinasamy-844085290/)
 
-Project Link: [https://github.com/yourusername/PDF-Summarizer](https://github.com/arun-66102/PDF-Summarizer)
+Project Link: [https://github.com/arun-66102/PDF-Summarizer](https://github.com/arun-66102/PDF-Summarizer)
