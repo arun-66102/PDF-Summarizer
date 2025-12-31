@@ -1,19 +1,22 @@
 # AI-Powered Document Processing System
 
-An intelligent document processing system that automates the extraction, summarization, and routing of PDF documents to the appropriate departments using AI and OCR technologies.
+An intelligent document processing system that automates the extraction, summarization, and routing of PDF documents using cloud-based AI models via Groq API.
 
 ## Features
 
 - **PDF Text Extraction**: Automatically extracts text from PDFs using OCR (Optical Character Recognition)
-- **AI-Powered Summarization**: Generates concise summaries of document content using advanced NLP models
-- **Department Classification**: Automatically identifies the most relevant department based on document content
-- **Intelligent Routing**: Forwards processed documents to the appropriate department for further action
-- **Efficient Workflow**: Reduces manual effort and improves document handling efficiency
+- **Cloud-Powered Summarization**: Generates concise summaries using Groq's fast Llama models
+- **Multiple Model Options**: Choose from Llama 3, Llama 3.1, and Mixtral models
+- **Intelligent Chunking**: Handles large documents with token-aware splitting
+- **Retry Mechanism**: Built-in error handling with automatic retries
+- **Rate Limit Handling**: Manages API limits with exponential backoff
+- **Progress Tracking**: Monitor processing progress for long documents
 
 ## Prerequisites
 
 - Python 3.8+
 - Tesseract OCR (for OCR functionality)
+- Groq API key (sign up at https://groq.com/)
 - Required Python packages (see `requirements.txt`)
 
 ## Installation
@@ -40,23 +43,75 @@ An intelligent document processing system that automates the extraction, summari
    pip install -r requirements.txt
    ```
 
+5. Set up Groq API key:
+   ```bash
+   # Windows (Command Prompt)
+   set GROQ_API_KEY=your_api_key_here
+   
+   # Windows (PowerShell)
+   $env:GROQ_API_KEY="your_api_key_here"
+   ```
+
 ## Usage
 
-1. Place your PDF files in the `input/` directory
-2. Run the main processing script:
-   ```bash
-   python main.py
-   ```
-3. Processed documents will be saved in the `output/` directory
-4. Check the logs in `logs/` for processing details
+### Basic Usage
+```python
+from pdf_ocr import process_pdf
+
+summary = process_pdf("document.pdf", model="llama3-8b")
+print(summary)
+```
+
+### With Progress Tracking
+```python
+def progress_callback(current, total):
+    print(f"Progress: {current}/{total} chunks processed")
+
+summary = process_pdf(
+    "document.pdf", 
+    model="llama3-70b",
+    progress_callback=progress_callback
+)
+```
+
+### Available Models
+- `llama3-8b` - Llama 3.1 8B Instant - **Default & Fastest**
+- `llama3-70b` - Llama 3.3 70B Versatile - **Higher Quality**
+- `llama-guard` - Llama Guard 4 12B - Content filtering
+- `gpt-oss-120b` - OpenAI GPT-OSS 120B
+- `gpt-oss-20b` - OpenAI GPT-OSS 20B
+- `whisper` - Whisper Large V3 - Speech-to-text
+- `whisper-turbo` - Whisper Large V3 Turbo - Faster speech-to-text
+
+### Command Line Usage
+```bash
+python pdf_ocr.py
+```
 
 ## Configuration
 
-Edit the `config.yaml` file to customize:
-- Department classification rules
-- Summary length and style
-- Output format and location
-- Logging preferences
+### Model Selection
+Choose models based on your needs:
+- **Speed**: `llama3-8b` (Llama 3.1 8B Instant)
+- **Quality**: `llama3-70b` (Llama 3.3 70B Versatile)
+- **OpenAI Compatible**: `gpt-oss-20b` or `gpt-oss-120b`
+- **Content Safety**: `llama-guard` for filtering
+
+### API Settings
+The system automatically handles:
+- Rate limiting with exponential backoff
+- Retry logic for failed requests
+- Timeout management
+- Error logging
+
+## Benefits over Local Models
+
+- ✅ **Much faster inference** (Groq's optimized infrastructure)
+- ✅ **No local GPU/CPU requirements**
+- ✅ **Better reliability and uptime**
+- ✅ **Access to latest models**
+- ✅ **Production-ready infrastructure**
+- ✅ **Built-in monitoring and logging**
 
 ## Project Structure
 
