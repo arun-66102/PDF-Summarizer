@@ -5,9 +5,9 @@ import pytesseract
 import numpy as np
 import re
 import tiktoken
-import subprocess
 import json
 import time
+import requests
 from typing import List, Optional, Dict, Any
 from collections import Counter
 import logging
@@ -171,83 +171,155 @@ logger = logging.getLogger(__name__)
 
 class ModelConfig:
     """Configuration for different models"""
-    OLLAMA_MODELS = {
-        "llama3": "llama3:8b",
-        "mistral": "mistral:7b", 
-        "qwen": "qwen:7b",
-        "phi": "phi:3.8b"
+    GROQ_MODELS = {
+        "llama3-8b": "llama-3.1-8b-instant",
+        "llama3-70b": "llama-3.3-70b-versatile", 
+        "llama-guard": "meta-llama/llama-guard-4-12b",
+        "gpt-oss-120b": "openai/gpt-oss-120b",
+        "gpt-oss-20b": "openai/gpt-oss-20b",
+        "whisper": "whisper-large-v3",
+        "whisper-turbo": "whisper-large-v3-turbo"
     }
     
-    DEFAULT_MODEL = "llama3"
+    DEFAULT_MODEL = "llama3-8b"
     MAX_RETRIES = 3
     RETRY_DELAY = 2  # seconds
-    TIMEOUT = 120  # seconds
+    TIMEOUT = 60  # seconds (reduced from 120 for faster failure)
+    GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+    
+    @classmethod
+    def get_api_key(cls):
+        """Get Groq API key from environment variable or file"""
+        import os
+        
+        # First try environment variable
+        api_key = os.getenv('GROQ_API_KEY')
+        
+        # If not found, try reading from file
+        if not api_key:
+            try:
+                key_file = os.path.join(os.path.dirname(__file__), '.groq_api_key')
+                with open(key_file, 'r', encoding='utf-8') as f:
+                    api_key = f.read().strip()
+                logger.info("API key loaded from .groq_api_key file")
+            except FileNotFoundError:
+                logger.error("API key not found in environment or .groq_api_key file")
+                logger.info("Set it with: set GROQ_API_KEY=your_key_here")
+                logger.info("Or create .groq_api_key file with your key")
+            except Exception as e:
+                logger.error(f"Error reading API key file: {e}")
+        
+        # Clean up the key - remove quotes if present
+        if api_key:
+            api_key = api_key.strip().strip('"').strip("'")
+        
+        if api_key and not api_key.startswith('gsk_'):
+            logger.warning("API key doesn't start with 'gsk_' - might be invalid")
+        
+        return api_key
 
-def ollama_generate(
+def groq_generate(
     prompt: str, 
     model: str = ModelConfig.DEFAULT_MODEL,
     max_retries: int = ModelConfig.MAX_RETRIES,
-    timeout: int = ModelConfig.TIMEOUT
+    timeout: int = ModelConfig.TIMEOUT,
+    temperature: float = 0.3,
+    max_tokens: int = 2000
 ) -> Optional[str]:
     """
-    Sends prompt to Ollama with retry mechanism and better error handling.
+    Sends prompt to Groq API with retry mechanism and better error handling.
     
     Args:
         prompt: The prompt to send to the model
-        model: Model name (key from ModelConfig.OLLAMA_MODELS)
+        model: Model name (key from ModelConfig.GROQ_MODELS)
         max_retries: Maximum number of retry attempts
         timeout: Timeout in seconds for each attempt
+        temperature: Sampling temperature
+        max_tokens: Maximum tokens in response
         
     Returns:
         Generated text or None if all retries fail
     """
-    model_name = ModelConfig.OLLAMA_MODELS.get(model, ModelConfig.OLLAMA_MODELS[ModelConfig.DEFAULT_MODEL])
+    api_key = ModelConfig.get_api_key()
+    if not api_key:
+        logger.error("GROQ_API_KEY environment variable not set")
+        return None
+    
+    model_name = ModelConfig.GROQ_MODELS.get(model, ModelConfig.GROQ_MODELS[ModelConfig.DEFAULT_MODEL])
+    
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "model": model_name,
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+        "stream": False
+    }
     
     for attempt in range(max_retries):
         try:
             logger.info(f"Attempt {attempt + 1}/{max_retries} for model {model_name}")
             
-            process = subprocess.Popen(
-                ["ollama", "run", model_name],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                encoding="utf-8",
-                errors="ignore"
+            response = requests.post(
+                ModelConfig.GROQ_API_URL,
+                headers=headers,
+                json=payload,
+                timeout=timeout
             )
             
-            try:
-                stdout, stderr = process.communicate(prompt, timeout=timeout)
-                
-                if process.returncode != 0:
-                    logger.error(f"Ollama process failed with return code {process.returncode}")
-                    if stderr:
-                        logger.error(f"Stderr: {stderr}")
-                    if attempt < max_retries - 1:
-                        time.sleep(ModelConfig.RETRY_DELAY)
-                        continue
-                    return None
-                    
-                output = stdout.strip()
-                if not output:
-                    logger.warning("Empty response from Ollama")
-                    if attempt < max_retries - 1:
-                        time.sleep(ModelConfig.RETRY_DELAY)
-                        continue
-                    return None
-                    
-                logger.info(f"Successfully generated response ({len(output)} chars)")
-                return output
-                
-            except subprocess.TimeoutExpired:
-                logger.error(f"Timeout after {timeout} seconds")
-                process.kill()
+            if response.status_code == 429:
+                logger.warning("Rate limit hit, waiting before retry...")
+                time.sleep(ModelConfig.RETRY_DELAY * (attempt + 1))
+                continue
+            elif response.status_code == 401:
+                logger.error("Invalid API key")
+                return None
+            elif response.status_code != 200:
+                logger.error(f"API request failed with status {response.status_code}: {response.text}")
                 if attempt < max_retries - 1:
                     time.sleep(ModelConfig.RETRY_DELAY)
                     continue
                 return None
-                
+            
+            response_data = response.json()
+            
+            if "choices" not in response_data or not response_data["choices"]:
+                logger.error("No choices in response")
+                if attempt < max_retries - 1:
+                    time.sleep(ModelConfig.RETRY_DELAY)
+                    continue
+                return None
+            
+            output = response_data["choices"][0]["message"]["content"].strip()
+            
+            if not output:
+                logger.warning("Empty response from Groq")
+                if attempt < max_retries - 1:
+                    time.sleep(ModelConfig.RETRY_DELAY)
+                    continue
+                return None
+            
+            logger.info(f"Successfully generated response ({len(output)} chars)")
+            return output
+            
+        except requests.exceptions.Timeout:
+            logger.error(f"Timeout after {timeout} seconds")
+            if attempt < max_retries - 1:
+                time.sleep(ModelConfig.RETRY_DELAY)
+                continue
+            return None
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Request error on attempt {attempt + 1}: {str(e)}")
+            if attempt < max_retries - 1:
+                time.sleep(ModelConfig.RETRY_DELAY)
+                continue
+            return None
         except Exception as e:
             logger.error(f"Unexpected error on attempt {attempt + 1}: {str(e)}")
             if attempt < max_retries - 1:
@@ -315,7 +387,7 @@ def summarize_chunks(
             continue
             
         prompt = build_summary_prompt(chunk, chunk_context=len(chunks) > 1)
-        summary = ollama_generate(prompt, model)
+        summary = groq_generate(prompt, model)
         
         if summary:
             # Validate summary quality
@@ -374,7 +446,7 @@ Partial Summaries:
 """
     
     logger.info(f"Generating final summary from {len(valid_summaries)} valid summaries")
-    final_summary = ollama_generate(prompt, model)
+    final_summary = groq_generate(prompt, model)
     
     if final_summary:
         logger.info("Final summary generated successfully")
@@ -462,7 +534,7 @@ if __name__ == "__main__":
     file_path = "sample.pdf"
     final_summary = process_pdf(
         file_path, 
-        model="llama3",  # Use model key from ModelConfig
+        model="llama3-8b",  # Use Groq model
         progress_callback=progress_callback
     )
     
