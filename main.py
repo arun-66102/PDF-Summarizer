@@ -6,7 +6,7 @@ from model_summarizer import summarize_chunks, generate_final_summary
 
 # Document routing imports
 try:
-    from embedding_store import classify_text_to_department
+    from embedding_store import classify_text_to_department_with_confidence
     ROUTING_AVAILABLE = True
     logger = logging.getLogger(__name__)
     logger.info("✅ Document routing available (with embeddings)")
@@ -19,8 +19,8 @@ except ImportError as e:
     # Fallback keyword-based routing
     from department_corpus import DEPARTMENT_CORPUS
     
-    def classify_text_to_department(text, top_k=1):
-        """Fallback keyword-based department routing"""
+    def classify_text_to_department_with_confidence(text, top_k=3, tie_threshold=0.05):
+        """Fallback keyword-based department routing with confidence"""
         text_lower = text.lower()
         department_scores = {}
         
@@ -47,8 +47,32 @@ except ImportError as e:
             reverse=True
         )
         
-        # Return department codes only
-        return [dept_code for dept_code, data in sorted_departments[:top_k]]
+        # Handle ties for fallback
+        if sorted_departments:
+            primary_score = sorted_departments[0][1]['score']
+            primary_departments = []
+            
+            for dept_code, data in sorted_departments:
+                if (primary_score - data['score']) <= 0:  # Exact score match for ties
+                    primary_departments.append(dept_code)
+                else:
+                    break
+            
+            return {
+                'primary_departments': primary_departments,
+                'all_matches': [{'department_code': code, **data} for code, data in sorted_departments],
+                'confidence': primary_score / len(dept_data['keywords']),  # Normalized confidence
+                'is_tie': len(primary_departments) > 1,
+                'tie_threshold': tie_threshold
+            }
+        
+        return {
+            'primary_departments': [],
+            'all_matches': [],
+            'confidence': 0.0,
+            'is_tie': False,
+            'tie_threshold': tie_threshold
+        }
 
 def process_pdf(
     file_path: str,
@@ -136,11 +160,23 @@ def process_pdf(
         if enable_routing and ROUTING_AVAILABLE:
             try:
                 logger.info("Routing document to department...")
-                routing_result = classify_text_to_department(final_summary, top_k=3)
-                logger.info(f"Document routed to {len(routing_result)} departments")
+                routing_result = classify_text_to_department_with_confidence(final_summary, top_k=3)
+                
+                primary_depts = routing_result.get('primary_departments', [])
+                logger.info(f"Document routed to {len(primary_depts)} primary department(s): {primary_depts}")
+                
+                if routing_result.get('is_tie'):
+                    logger.info(f"Tie detected between departments: {primary_depts}")
+                
             except Exception as e:
                 logger.error(f"Routing failed: {e}")
-                routing_result = []
+                routing_result = {
+                    'primary_departments': [],
+                    'all_matches': [],
+                    'confidence': 0.0,
+                    'is_tie': False,
+                    'tie_threshold': 0.05
+                }
         
         # Prepare result
         result = {
@@ -150,8 +186,11 @@ def process_pdf(
             "chunks_processed": len(text_chunks),
             "model_used": model,
             "routing": {
-                "departments": routing_result if routing_result else [],
-                "primary_department": routing_result[0] if routing_result else None,
+                "primary_departments": routing_result.get('primary_departments', []) if routing_result else [],
+                "all_matches": routing_result.get('all_matches', []) if routing_result else [],
+                "confidence": routing_result.get('confidence', 0.0) if routing_result else 0.0,
+                "is_tie": routing_result.get('is_tie', False) if routing_result else False,
+                "tie_threshold": routing_result.get('tie_threshold', 0.05) if routing_result else 0.05,
                 "method": "embedding" if ROUTING_AVAILABLE else "keyword_match",
                 "available": ROUTING_AVAILABLE
             }
@@ -202,28 +241,21 @@ if __name__ == "__main__":
         
         # Display routing information
         routing = result.get('routing', {})
-        departments = routing.get('departments', [])
+        primary_depts = routing.get('primary_departments', [])
         
-        if departments:
+        if primary_depts:
             print("\n" + "="*40)
             print("DEPARTMENT ROUTING")
             print("="*40)
             
-            primary_dept = routing.get('primary_department')
-            if primary_dept:
-                print(f"🎯 Primary Department: {primary_dept}")
-                print(f"🔍 Method: {routing.get('method', 'unknown')}")
-            
-            print(f"\n📋 Matched Department Codes ({len(departments)}):")
-            for i, dept_code in enumerate(departments, 1):
-                print(f"  {i}. {dept_code}")
+            if len(primary_depts) == 1:
+                print(f"🎯 {primary_depts[0]}")
+            else:
+                print(f"🎯 {', '.join(primary_depts)}")
         else:
             print("\n" + "="*40)
             print("DEPARTMENT ROUTING")
             print("="*40)
-            if routing.get('available'):
-                print("⚠️  No departments matched this document")
-            else:
-                print("❌ Routing disabled or unavailable")
+            print("❌ No departments matched")
     
     print("\n" + "="*60)
