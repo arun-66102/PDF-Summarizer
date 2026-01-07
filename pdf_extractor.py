@@ -3,7 +3,20 @@ from pdf2image import convert_from_path
 import cv2
 import pytesseract
 import numpy as np
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+import os
+import platform
+
+# Set Tesseract path based on operating system
+if platform.system() == "Windows":
+    tesseract_path = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    if os.path.exists(tesseract_path):
+        pytesseract.pytesseract.tesseract_cmd = tesseract_path
+elif platform.system() == "Linux":
+    # On Linux, Tesseract is usually in PATH
+    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+elif platform.system() == "Darwin":  # macOS
+    # On macOS, Tesseract is usually in PATH or Homebrew
+    pytesseract.pytesseract.tesseract_cmd = '/usr/local/bin/tesseract'
 
 def extract_text_from_pdf(pdf_path):
     doc = pymupdf.open(pdf_path)
