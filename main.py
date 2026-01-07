@@ -1,53 +1,51 @@
 import logging
 from typing import Optional
-
 from pdf_extractor import extract_text_from_pdf, needs_ocr, ocr_text_from_pdf
 from text_processor import clean_extracted_text, prepare_text_for_llm
 from model_summarizer import summarize_chunks, generate_final_summary
-from mailer import send_summary_to_department
 
-# -------------------- LOGGER SETUP --------------------
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
-
-# -------------------- ROUTING IMPORTS --------------------
+# Document routing imports
 try:
     from embedding_store import classify_text_to_department_with_confidence
     ROUTING_AVAILABLE = True
+    logger = logging.getLogger(__name__)
     logger.info("✅ Document routing available (with embeddings)")
 except ImportError as e:
     ROUTING_AVAILABLE = False
-    logger.warning(f"⚠️ Document routing not available: {e}")
-    logger.info("Install with: pip install sentence-transformers chromadb")
-
+    logger = logging.getLogger(__name__)
+    logger.warning(f"⚠️  Document routing not available: {e}")
+    logger.info("   Install with: pip install sentence-transformers chromadb")
+    
+    # Fallback keyword-based routing
     from department_corpus import DEPARTMENT_CORPUS
-<<<<<<< HEAD
-
-    def classify_text_to_department(text, top_k=1):
-        """Fallback keyword-based department routing"""
-=======
     
     def classify_text_to_department_with_confidence(text, top_k=3, tie_threshold=0.05):
         """Fallback keyword-based department routing with confidence"""
->>>>>>> 18ddbc8a927c1e0c55156cb26eae55c77dc6ff48
         text_lower = text.lower()
         department_scores = {}
-
+        
         for dept_code, dept_data in DEPARTMENT_CORPUS.items():
             score = 0
-            for keyword in dept_data["keywords"]:
+            matched_keywords = []
+            
+            for keyword in dept_data['keywords']:
                 if keyword.lower() in text_lower:
                     score += 1
+                    matched_keywords.append(keyword)
+            
             if score > 0:
-                department_scores[dept_code] = score
-
+                department_scores[dept_code] = {
+                    'score': score,
+                    'department_name': dept_data['department_name'],
+                    'matched_keywords': matched_keywords
+                }
+        
+        # Sort by score (highest first)
         sorted_departments = sorted(
-            department_scores.items(),
-            key=lambda x: x[1],
+            department_scores.items(), 
+            key=lambda x: x[1]['score'], 
             reverse=True
         )
-<<<<<<< HEAD
-=======
         
         # Handle ties for fallback
         if sorted_departments:
@@ -75,84 +73,104 @@ except ImportError as e:
             'is_tie': False,
             'tie_threshold': tie_threshold
         }
->>>>>>> 18ddbc8a927c1e0c55156cb26eae55c77dc6ff48
 
-        return [dept for dept, _ in sorted_departments[:top_k]]
+# Email sending imports
+try:
+    from mailer import send_summary_to_department
+    EMAIL_AVAILABLE = True
+    logger.info("✅ Email sending available")
+except ImportError as e:
+    EMAIL_AVAILABLE = False
+    logger.warning(f"⚠️  Email sending not available: {e}")
+    logger.info("   Check mailer.py configuration")
 
-# ======================================================
-#                    MAIN PIPELINE
-# ======================================================
 def process_pdf(
     file_path: str,
     model: str = "llama3-8b",
     model_context_limit: int = 4000,
     progress_callback: Optional[callable] = None,
-    enable_routing: bool = True
+    enable_routing: bool = True,
+    enable_email: bool = True
 ) -> dict:
+    """
+    Complete PDF processing pipeline with error handling.
+    
+    Args:
+        file_path: Path to PDF file
+        model: Model name to use
+        model_context_limit: Context limit for the model
+        progress_callback: Optional progress callback
+        enable_routing: Whether to enable department routing
+        enable_email: Whether to send email to routed departments
+        
+    Returns:
+        Dictionary with summary, routing, and email status
+    """
     try:
         logger.info(f"Starting PDF processing for: {file_path}")
-
-        # -------- TEXT EXTRACTION --------
+        
+        # Extract text
         text_content = extract_text_from_pdf(file_path)
-
+        
+        # Check if OCR is needed
+        ocr_text = ""
         if needs_ocr(text_content):
             logger.info("OCR required, performing OCR...")
-            text_content = ocr_text_from_pdf(file_path)
-
-        cleaned_text = clean_extracted_text(text_content)
-
+            ocr_text = ocr_text_from_pdf(file_path)
+        else:
+            logger.info("Text extraction sufficient, skipping OCR")
+            ocr_text = text_content
+        
+        # Clean the extracted text
+        cleaned_text = clean_extracted_text(ocr_text)
+        logger.info(f"Cleaned text length: {len(cleaned_text)} characters")
+        
         if not cleaned_text.strip():
+            logger.warning("No meaningful text extracted from PDF")
             return {
-                "summary": "No meaningful content found",
+                "summary": "No meaningful content found in PDF",
                 "routing": None,
-                "error": "Empty document"
+                "error": "No content extracted"
             }
-
-        # -------- CHUNKING --------
+        
+        # Chunking the text for model
         text_chunks = prepare_text_for_llm(
             cleaned_text,
             model_context_limit=model_context_limit,
-            model_name="gpt-4"
+            model_name="gpt-4"  # works as approximation for token counting
         )
-
-        # -------- SUMMARIZATION --------
+        logger.info(f"Text split into {len(text_chunks)} chunks")
+        
+        # Summary generation
         chunk_summaries = summarize_chunks(text_chunks, model, progress_callback)
-        final_summary = generate_final_summary(chunk_summaries, model)
-
-        if not final_summary:
+        
+        # Check if we have any valid summaries
+        valid_summaries = [s for s in chunk_summaries if s and not s.startswith("Failed to summarize")]
+        if not valid_summaries:
+            logger.error("No valid chunk summaries generated")
             return {
-                "summary": "Final summarization failed",
+                "summary": "Failed to generate any summaries from the document",
                 "routing": None,
-                "error": "Summarization error"
+                "error": "Summarization failed"
             }
-
-        logger.info("Final summary generated successfully")
-
-        # -------- ROUTING --------
-        routing_result = []
-        primary_department = None
-
-        if enable_routing:
-            routing_result = classify_text_to_department(final_summary, top_k=3)
-            primary_department = routing_result[0] if routing_result else None
-            logger.info(f"Primary Department: {primary_department}")
-
-        # -------- EMAIL --------
-        if primary_department:
-            try:
-<<<<<<< HEAD
-                send_summary_to_department(
-                    summary=final_summary,
-                    department=primary_department,
-                    document_name="C:\Users\indhu\Downloads\STL_Delete_Functions_Explanation.pdf"
-                )
-            except Exception as e:
-                logger.error(f"Email sending failed: {e}")
-
+        
+        # Generate final summary
+        final_summary = generate_final_summary(chunk_summaries, model)
+        
+        if not final_summary:
+            logger.error("Failed to generate final summary")
+            return {
+                "summary": "Failed to generate final summary",
+                "routing": None,
+                "error": "Final summarization failed"
+            }
+        
         logger.info("PDF processing completed successfully")
-
-        return {
-=======
+        
+        # Document routing (if enabled)
+        routing_result = None
+        if enable_routing and ROUTING_AVAILABLE:
+            try:
                 logger.info("Routing document to department...")
                 routing_result = classify_text_to_department_with_confidence(final_summary, top_k=3)
                 
@@ -174,56 +192,74 @@ def process_pdf(
         
         # Prepare result
         result = {
->>>>>>> 18ddbc8a927c1e0c55156cb26eae55c77dc6ff48
             "summary": final_summary,
             "file_path": file_path,
             "text_length": len(cleaned_text),
             "chunks_processed": len(text_chunks),
             "model_used": model,
             "routing": {
-<<<<<<< HEAD
-                "departments": routing_result,
-                "primary_department": primary_department,
-                "method": "embedding" if ROUTING_AVAILABLE else "keyword",
-=======
                 "primary_departments": routing_result.get('primary_departments', []) if routing_result else [],
                 "all_matches": routing_result.get('all_matches', []) if routing_result else [],
                 "confidence": routing_result.get('confidence', 0.0) if routing_result else 0.0,
                 "is_tie": routing_result.get('is_tie', False) if routing_result else False,
                 "tie_threshold": routing_result.get('tie_threshold', 0.05) if routing_result else 0.05,
                 "method": "embedding" if ROUTING_AVAILABLE else "keyword_match",
->>>>>>> 18ddbc8a927c1e0c55156cb26eae55c77dc6ff48
                 "available": ROUTING_AVAILABLE
+            },
+            "email": {
+                "enabled": enable_email,
+                "available": EMAIL_AVAILABLE,
+                "sent": False,
+                "departments_sent": [],
+                "errors": []
             }
         }
-
+        
+        # Send emails to routed departments
+        if enable_email and EMAIL_AVAILABLE and routing_result:
+            primary_depts = routing_result.get('primary_departments', [])
+            if primary_depts:
+                logger.info(f"Sending emails to {len(primary_depts)} department(s): {primary_depts}")
+                
+                for dept in primary_depts:
+                    try:
+                        send_summary_to_department(final_summary, dept, file_path)
+                        result["email"]["departments_sent"].append(dept)
+                        logger.info(f"✅ Email sent to {dept}")
+                    except Exception as e:
+                        error_msg = f"Failed to send to {dept}: {str(e)}"
+                        logger.error(error_msg)
+                        result["email"]["errors"].append(error_msg)
+                
+                result["email"]["sent"] = True
+            elif enable_email and not EMAIL_AVAILABLE:
+                logger.warning("Email sending requested but mailer.py not available")
+                result["email"]["errors"].append("Email sending not available")
+        
+        return result
+        
     except Exception as e:
-        logger.exception("Unhandled error during PDF processing")
+        logger.error(f"Error processing PDF: {str(e)}")
         return {
-            "summary": str(e),
+            "summary": f"Error processing PDF: {str(e)}",
             "routing": None,
             "error": str(e)
         }
 
-
-# ================== ROUTING SANITY TEST ==================
+# Example usage:
 if __name__ == "__main__":
-<<<<<<< HEAD
-    test_text = "This document discusses machine learning, algorithms, and software development."
-    print("Routing test output:")
-    print(classify_text_to_department(test_text, top_k=1))
-=======
     def progress_callback(current, total):
         print(f"Progress: {current}/{total} chunks processed")
     
     file_path = "sample.pdf"
     
-    # Process PDF with routing enabled
+    # Process PDF with routing and email enabled
     result = process_pdf(
         file_path, 
         model="llama3-8b",  # Use Groq model
         progress_callback=progress_callback,
-        enable_routing=True  # Enable department routing
+        enable_routing=True,     # Enable department routing
+        enable_email=True       # Enable email sending
     )
     
     # Display results
@@ -262,6 +298,32 @@ if __name__ == "__main__":
             print("DEPARTMENT ROUTING")
             print("="*40)
             print("❌ No departments matched")
+        
+        # Display email information
+        email = result.get('email', {})
+        if email.get('enabled'):
+            print("\n" + "="*40)
+            print("EMAIL STATUS")
+            print("="*40)
+            
+            if email.get('sent'):
+                sent_depts = email.get('departments_sent', [])
+                if sent_depts:
+                    print(f"📧 Emails sent to: {', '.join(sent_depts)}")
+                else:
+                    print("📧 Email enabled but no departments to send")
+            else:
+                print("📧 Email enabled but not sent")
+            
+            errors = email.get('errors', [])
+            if errors:
+                print(f"❌ Email errors:")
+                for error in errors:
+                    print(f"   • {error}")
+        else:
+            print("\n" + "="*40)
+            print("EMAIL STATUS")
+            print("="*40)
+            print("📧 Email disabled")
     
     print("\n" + "="*60)
->>>>>>> 18ddbc8a927c1e0c55156cb26eae55c77dc6ff48
