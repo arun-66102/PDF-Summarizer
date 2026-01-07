@@ -73,7 +73,7 @@ except ImportError as e:
             'is_tie': False,
             'tie_threshold': tie_threshold
         }
->>>>>>> 18ddbc8a927c1e0c55156cb26eae55c77dc6ff48
+
 
         return [dept for dept, _ in sorted_departments[:top_k]]
 
@@ -279,4 +279,3 @@ if __name__ == "__main__":
             print("📧 Email disabled")
     
     print("\n" + "="*60)
->>>>>>> 18ddbc8a927c1e0c55156cb26eae55c77dc6ff48
