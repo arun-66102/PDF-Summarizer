@@ -73,17 +73,13 @@ except ImportError as e:
             'is_tie': False,
             'tie_threshold': tie_threshold
         }
+>>>>>>> 18ddbc8a927c1e0c55156cb26eae55c77dc6ff48
 
-# Email sending imports
-try:
-    from mailer import send_summary_to_department
-    EMAIL_AVAILABLE = True
-    logger.info("✅ Email sending available")
-except ImportError as e:
-    EMAIL_AVAILABLE = False
-    logger.warning(f"⚠️  Email sending not available: {e}")
-    logger.info("   Check mailer.py configuration")
+        return [dept for dept, _ in sorted_departments[:top_k]]
 
+# ======================================================
+#                    MAIN PIPELINE
+# ======================================================
 def process_pdf(
     file_path: str,
     model: str = "llama3-8b",
@@ -92,20 +88,6 @@ def process_pdf(
     enable_routing: bool = True,
     enable_email: bool = True
 ) -> dict:
-    """
-    Complete PDF processing pipeline with error handling.
-    
-    Args:
-        file_path: Path to PDF file
-        model: Model name to use
-        model_context_limit: Context limit for the model
-        progress_callback: Optional progress callback
-        enable_routing: Whether to enable department routing
-        enable_email: Whether to send email to routed departments
-        
-    Returns:
-        Dictionary with summary, routing, and email status
-    """
     try:
         logger.info(f"Starting PDF processing for: {file_path}")
         
@@ -205,39 +187,9 @@ def process_pdf(
                 "tie_threshold": routing_result.get('tie_threshold', 0.05) if routing_result else 0.05,
                 "method": "embedding" if ROUTING_AVAILABLE else "keyword_match",
                 "available": ROUTING_AVAILABLE
-            },
-            "email": {
-                "enabled": enable_email,
-                "available": EMAIL_AVAILABLE,
-                "sent": False,
-                "departments_sent": [],
-                "errors": []
             }
         }
-        
-        # Send emails to routed departments
-        if enable_email and EMAIL_AVAILABLE and routing_result:
-            primary_depts = routing_result.get('primary_departments', [])
-            if primary_depts:
-                logger.info(f"Sending emails to {len(primary_depts)} department(s): {primary_depts}")
-                
-                for dept in primary_depts:
-                    try:
-                        send_summary_to_department(final_summary, dept, file_path)
-                        result["email"]["departments_sent"].append(dept)
-                        logger.info(f"✅ Email sent to {dept}")
-                    except Exception as e:
-                        error_msg = f"Failed to send to {dept}: {str(e)}"
-                        logger.error(error_msg)
-                        result["email"]["errors"].append(error_msg)
-                
-                result["email"]["sent"] = True
-            elif enable_email and not EMAIL_AVAILABLE:
-                logger.warning("Email sending requested but mailer.py not available")
-                result["email"]["errors"].append("Email sending not available")
-        
-        return result
-        
+
     except Exception as e:
         logger.error(f"Error processing PDF: {str(e)}")
         return {
@@ -327,3 +279,4 @@ if __name__ == "__main__":
             print("📧 Email disabled")
     
     print("\n" + "="*60)
+>>>>>>> 18ddbc8a927c1e0c55156cb26eae55c77dc6ff48
