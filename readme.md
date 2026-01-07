@@ -32,10 +32,9 @@ An intelligent document processing system that automates extraction, summarizati
    ```
 
 2. Install Tesseract OCR:
-   - **Windows**: Download and install from [UB Mannheim](https://github.com/UB-Mannheim/tesseract/wiki)
-   - **macOS**: `brew install tesseract`
-   - **Linux**: `sudo apt-get install tesseract-ocr` (Ubuntu/Debian) or `sudo yum install tesseract` (CentOS/RHEL)
-   - **Docker**: `apt-get update && apt-get install -y tesseract-ocr`
+   - Windows: Download and install from [UB Mannheim](https://github.com/UB-Mannheim/tesseract/wiki)
+   - macOS: `brew install tesseract`
+   - Linux: `sudo apt-get install tesseract-ocr`
 
 3. Create and activate a virtual environment:
    ```bash
