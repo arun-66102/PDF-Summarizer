@@ -89,15 +89,26 @@ def send_pdf_to_departments(pdf_path: str, summary: str, routing_result: dict):
         print(f"📧 Sending PDF to {len(primary_departments)} department(s): {', '.join(primary_departments)}")
         
         success_count = 0
+        failed_departments = []
+        
         for dept_code in primary_departments:
             try:
-                send_summary_to_department(summary, dept_code, pdf_path)
-                print(f"✅ Email sent to {dept_code}")
-                success_count += 1
+                result = send_summary_to_department(summary, dept_code, pdf_path)
+                if result:
+                    print(f"✅ Email sent to {dept_code}")
+                    success_count += 1
+                else:
+                    print(f"❌ Failed to send to {dept_code}")
+                    failed_departments.append(dept_code)
             except Exception as e:
                 print(f"❌ Failed to send to {dept_code}: {e}")
+                failed_departments.append(dept_code)
         
         print(f"📊 Email Summary: {success_count}/{len(primary_departments)} sent successfully")
+        
+        if failed_departments:
+            print(f"❌ Failed departments: {', '.join(failed_departments)}")
+        
         return success_count > 0
         
     except ImportError:
