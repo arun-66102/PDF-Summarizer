@@ -325,7 +325,7 @@ def main():
     st.markdown("""
     <div style='text-align: center; color: #666; padding: 20px;'>
         <p>🤖 Powered by Groq AI • 🎯 Intelligent Routing • 📧 Automated Delivery</p>
-        <p>Team RAG Retrievers</p>
+        <p>Built byRAG Retrievers</p>
     </div>
     """, unsafe_allow_html=True)
 
