@@ -264,10 +264,10 @@ def main():
                             st.markdown('<div class="email-box">', unsafe_allow_html=True)
                             st.subheader("📧 Email Delivery")
                             
-                            # Send emails
+                            # Send emails using the temporary file path
                             from main import send_pdf_to_departments
                             email_sent = send_pdf_to_departments(
-                                uploaded_file.name, 
+                                tmp_file_path,  # Use temporary file path
                                 result['summary'], 
                                 routing
                             )
