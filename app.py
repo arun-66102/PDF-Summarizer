@@ -217,7 +217,7 @@ def main():
                 status_text.text("📧 Sending emails (if enabled)...")
                 
                 # Clean up temporary file
-                os.unlink(tmp_file_path)
+                #os.unlink(tmp_file_path)
                 
                 progress_bar.progress(100)
                 status_text.text("✅ Processing complete!")
@@ -267,7 +267,7 @@ def main():
                             # Send emails
                             from main import send_pdf_to_departments
                             email_sent = send_pdf_to_departments(
-                                uploaded_file.name, 
+                                tmp_file_path, 
                                 result['summary'], 
                                 routing
                             )
