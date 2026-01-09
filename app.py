@@ -156,7 +156,7 @@ def main():
             type=['pdf'],
             help="Upload a PDF document for processing"
         )
-        
+        original_file_name = uploaded_file.name if uploaded_file is not None else None
         if uploaded_file is not None:
             # Display file info
             st.success(f"✅ File uploaded: {uploaded_file.name}")
@@ -217,7 +217,7 @@ def main():
                 status_text.text("📧 Sending emails (if enabled)...")
                 
                 # Clean up temporary file
-                #os.unlink(tmp_file_path)
+                os.unlink(tmp_file_path)
                 
                 progress_bar.progress(100)
                 status_text.text("✅ Processing complete!")
@@ -267,7 +267,7 @@ def main():
                             # Send emails
                             from main import send_pdf_to_departments
                             email_sent = send_pdf_to_departments(
-                                tmp_file_path, 
+                                original_file_name, 
                                 result['summary'], 
                                 routing
                             )
