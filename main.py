@@ -241,7 +241,7 @@ if __name__ == "__main__":
     def progress_callback(current, total):
         print(f"Progress: {current}/{total} chunks processed")
     
-    file_path = "sample.pdf"
+    file_path = "EEE.pdf"
     
     # Process PDF with routing enabled
     result = process_pdf(
