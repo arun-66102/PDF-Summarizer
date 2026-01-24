@@ -3,10 +3,10 @@ import smtplib
 from email.message import EmailMessage
 
 DEPARTMENT_EMAILS = {
-    "CSE": "1989indhusri@gmail.com",
+    "CSE": "arun8778765@gmail.com",
     "EEE": "arunkumar7904334@gmail.com",
     "MECH": "1989indhusri@gmail.com",
-    "CIVIL": "1989indhusri@gmail.com"
+    "CIVIL": "dhan0529Ree@gmail.com"
 }
 
 def send_summary_to_department(summary, department, document_name):
