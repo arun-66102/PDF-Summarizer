@@ -13,7 +13,7 @@ from main import process_pdf
 
 # Configure Streamlit page
 st.set_page_config(
-    page_title="PDF Document Processor",
+    page_title="RouteX",
     page_icon="📄",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -78,7 +78,7 @@ st.markdown("""
 
 def main():
     # Header
-    st.markdown('<h1 class="main-header">🤖 AI-Powered Document Processor</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🤖 RouteX Intelligent Document Processor</h1>', unsafe_allow_html=True)
     st.markdown("---")
     
     # Sidebar for configuration
