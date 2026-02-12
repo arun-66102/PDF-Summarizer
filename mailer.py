@@ -3,12 +3,12 @@ import smtplib
 from email.message import EmailMessage
 from dotenv import load_dotenv, find_dotenv
 
-load_dotenv(find_dotenv()) 
+load_dotenv(find_dotenv())
 DEPARTMENT_EMAILS = {
     "CSE": "arun877865@gmail.com",
     "EEE": "arunkumar7904334@gmail.com",
     "MECH": "1989indhusri@gmail.com",
-    "CIVIL": "dhan0529Ree@gmail.com"
+    "CIVIL": "adhithiee2907@gmail.com"
 }
 
 def send_summary_to_department(summary, department, document_name):
