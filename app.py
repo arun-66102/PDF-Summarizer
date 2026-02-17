@@ -589,14 +589,30 @@ st.markdown("""
         font-size: 0.95rem !important;
     }
 
-    /* ── Footer ── */
+    /* ── Footer — fixed at bottom ── */
     .app-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
         text-align: center;
-        padding: 0.5rem 0 1rem;
+        padding: 0.4rem 0 0.4rem;
+        background: #FDFBD4; /* Match bg to cover scrolling content */
+        border-top: 1px solid #543A14;
         color: #713600;
         font-size: 0.7rem;
+        z-index: 10000;
     }
     .app-footer span { color: #C05800; font-weight: 600; }
+
+    /* ── Adjust chat input to sit above footer ── */
+    [data-testid="stBottom"] {
+        bottom: 2.5rem !important; /* Make room for footer */
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
 
     /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 6px; }
