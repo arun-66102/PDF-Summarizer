@@ -16,12 +16,10 @@ st.set_page_config(
     page_title="RouteX",
     page_icon="logo.png",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
-# ══════════════════════════════════════════════════════════════════════════════
-# PREMIUM CSS — ChatGPT / Gemini Dark Theme
-# ══════════════════════════════════════════════════════════════════════════════
+# ── Custom CSS for Chocolate Truffle Theme ──────────────────────────────────────────
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -31,6 +29,13 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
     }
 
+    /* ── Hide Streamlit chrome EXCEPT header/sidebar toggle ── */
+    #MainMenu { visibility: hidden; }
+    footer { visibility: hidden; }
+    .stDeployButton { display: none; }
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+    }
     /* ── Text contrast — dark brown on cream ── */
     .stApp, .stApp p, .stApp span, .stApp li, .stApp td, .stApp th,
     .stApp label, .stApp div {
@@ -236,9 +241,8 @@ st.markdown("""
         fill: #C05800 !important;
     }
 
-    /* ── Hide Streamlit chrome ── */
-    #MainMenu, footer, header { visibility: hidden; }
-    .stDeployButton { display: none; }
+    /* ── Hide Streamlit chrome (header handled above) ── */
+    #MainMenu, footer { visibility: hidden; }
 
     /* ── Chocolate Truffle background ── */
     .stApp {
