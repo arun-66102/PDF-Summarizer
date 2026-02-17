@@ -639,23 +639,24 @@ st.markdown("""
         font-weight: 500 !important;
     }
 
-    /* ── Doc send button — chocolate orange gradient ── */
-    .doc-send-btn button {
-        background: linear-gradient(135deg, #C05800, #A04A00) !important;
+    /* ── Sidebar "New Chat" button ── */
+    section[data-testid="stSidebar"] [data-testid="stButton"] button {
+        background: #C05800 !important;
+        border: 1px solid #713600 !important;
         color: #FDFBD4 !important;
-        border: none !important;
         border-radius: 12px !important;
-        font-weight: 700 !important;
-        font-size: 0.88rem !important;
-        padding: 0.55rem 1.25rem !important;
-        animation: pulse-send 1.8s ease-in-out infinite;
-        transition: all 0.25s ease !important;
-        box-shadow: 0 4px 16px rgba(192,88,0,0.35);
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        padding: 0.4rem 1rem !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 4px 12px rgba(56,36,13,0.3) !important;
     }
-    .doc-send-btn button:hover {
-        transform: scale(1.03) !important;
-        box-shadow: 0 6px 28px rgba(192,88,0,0.4) !important;
-        background: linear-gradient(135deg, #A04A00, #C05800) !important;
+    section[data-testid="stSidebar"] [data-testid="stButton"] button:hover {
+        background: #A04A00 !important;
+        color: #FFFFFF !important;
+        border-color: #543A14 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 16px rgba(192,88,0,0.3) !important;
     }
     @keyframes pulse-send {
         0%, 100% { box-shadow: 0 4px 16px rgba(192,88,0,0.3); }
