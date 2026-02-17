@@ -633,10 +633,24 @@ st.markdown("""
     }
 
     /* ── Expander in sidebar ── */
-    section[data-testid="stSidebar"] .streamlit-expanderHeader {
+    section[data-testid="stSidebar"] [data-testid="stExpander"] {
+        background: #543A14 !important;
+        border: 1px solid #713600 !important;
+        border-radius: 8px !important;
         color: #FDFBD4 !important;
-        font-size: 0.82rem !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stExpander"] summary {
+        color: #FDFBD4 !important;
         font-weight: 500 !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stExpander"] summary:hover {
+        color: #C05800 !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stExpander"] svg {
+        fill: #FDFBD4 !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stExpander"] [data-testid="stExpanderDetails"] {
+        color: #FDFBD4 !important;
     }
 
     /* ── Sidebar "New Chat" button ── */
