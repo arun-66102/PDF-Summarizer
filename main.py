@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 from pdf_extractor import extract_text_from_pdf, needs_ocr, ocr_text_from_pdf
+from text_content_processor import validate_text_input, extract_text_content, get_text_stats
 from text_processor import clean_extracted_text, prepare_text_for_llm
 from model_summarizer import summarize_chunks, generate_final_summary
 
@@ -232,6 +233,145 @@ def process_pdf(
         logger.error(f"Error processing PDF: {str(e)}")
         return {
             "summary": f"Error processing PDF: {str(e)}",
+            "routing": None,
+            "error": str(e)
+        }
+
+
+def process_text(
+    text_content: str,
+    model: str = "llama3-8b",
+    model_context_limit: int = 4000,
+    progress_callback: Optional[callable] = None,
+    enable_routing: bool = True
+) -> dict:
+    """
+    Complete text content processing pipeline with error handling.
+    Mirrors process_pdf but for raw text input via text_content_processor.
+    
+    Args:
+        text_content: Raw text content from user
+        model: Model name to use
+        model_context_limit: Context limit for the model
+        progress_callback: Optional progress callback
+        enable_routing: Whether to enable department routing
+        
+    Returns:
+        Dictionary with summary and routing information
+    """
+    try:
+        logger.info("Starting text content processing")
+        
+        # Validate text input (via text_content_processor)
+        if not validate_text_input(text_content):
+            logger.warning("Text input validation failed")
+            return {
+                "summary": "Text input is too short or not meaningful enough to process",
+                "routing": None,
+                "error": "Validation failed"
+            }
+        
+        # Extract and normalize text (via text_content_processor)
+        extracted_text = extract_text_content(text_content)
+        
+        # Get text stats for metadata (via text_content_processor)
+        text_stats = get_text_stats(extracted_text)
+        logger.info(f"Text stats: {text_stats['word_count']} words, {text_stats['paragraph_count']} paragraphs")
+        
+        # Clean the extracted text (via text_processor)
+        cleaned_text = clean_extracted_text(extracted_text)
+        logger.info(f"Cleaned text length: {len(cleaned_text)} characters")
+        
+        if not cleaned_text.strip():
+            logger.warning("No meaningful text after cleaning")
+            return {
+                "summary": "No meaningful content found in the provided text",
+                "routing": None,
+                "error": "No content after cleaning"
+            }
+        
+        # Chunking the text for model
+        text_chunks = prepare_text_for_llm(
+            cleaned_text,
+            model_context_limit=model_context_limit,
+            model_name="gpt-4"  # works as approximation for token counting
+        )
+        logger.info(f"Text split into {len(text_chunks)} chunks")
+        
+        # Summary generation
+        chunk_summaries = summarize_chunks(text_chunks, model, progress_callback)
+        
+        # Check if we have any valid summaries
+        valid_summaries = [s for s in chunk_summaries if s and not s.startswith("Failed to summarize")]
+        if not valid_summaries:
+            logger.error("No valid chunk summaries generated")
+            return {
+                "summary": "Failed to generate any summaries from the text",
+                "routing": None,
+                "error": "Summarization failed"
+            }
+        
+        # Generate final summary
+        final_summary = generate_final_summary(chunk_summaries, model)
+        
+        if not final_summary:
+            logger.error("Failed to generate final summary")
+            return {
+                "summary": "Failed to generate final summary",
+                "routing": None,
+                "error": "Final summarization failed"
+            }
+        
+        logger.info("Text processing completed successfully")
+        
+        # Document routing (if enabled)
+        routing_result = None
+        if enable_routing and ROUTING_AVAILABLE:
+            try:
+                logger.info("Routing document to department...")
+                routing_result = classify_text_to_department_with_confidence(final_summary, top_k=3)
+                
+                primary_depts = routing_result.get('primary_departments', [])
+                logger.info(f"Document routed to {len(primary_depts)} primary department(s): {primary_depts}")
+                
+                if routing_result.get('is_tie'):
+                    logger.info(f"Tie detected between departments: {primary_depts}")
+                
+            except Exception as e:
+                logger.error(f"Routing failed: {e}")
+                routing_result = {
+                    'primary_departments': [],
+                    'all_matches': [],
+                    'confidence': 0.0,
+                    'is_tie': False,
+                    'tie_threshold': 0.05
+                }
+        
+        # Prepare result
+        result = {
+            "summary": final_summary,
+            "source": "text_input",
+            "text_length": len(cleaned_text),
+            "chunks_processed": len(text_chunks),
+            "model_used": model,
+            "text_stats": text_stats,
+            "routing": {
+                "primary_departments": routing_result.get('primary_departments', []) if routing_result else [],
+                "all_matches": routing_result.get('all_matches', []) if routing_result else [],
+                "confidence": routing_result.get('confidence', 0.0) if routing_result else 0.0,
+                "is_tie": routing_result.get('is_tie', False) if routing_result else False,
+                "tie_threshold": routing_result.get('tie_threshold', 0.05) if routing_result else 0.05,
+                "method": "embedding" if ROUTING_AVAILABLE else "keyword_match",
+                "available": ROUTING_AVAILABLE
+            }
+        }
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error processing text: {str(e)}")
+        return {
+            "summary": f"Error processing text: {str(e)}",
             "routing": None,
             "error": str(e)
         }
