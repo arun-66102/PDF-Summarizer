@@ -113,19 +113,36 @@ st.markdown("""
     }
 
     /* ── Chat input container — remove dark wrapper ── */
-    [data-testid="stBottom"],
+    [data-testid="stBottom"] {
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
     [data-testid="stBottom"] > div {
         background: transparent !important;
         background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
     }
-    [data-testid="stBottomBlockContainer"],
+    [data-testid="stBottomBlockContainer"] {
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
     [data-testid="stBottomBlockContainer"] > div {
         background: transparent !important;
         background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
     }
 
     /* ── Chat input bar ── */
-    [data-testid="stChatInput"],
+    [data-testid="stChatInput"] {
+        background: transparent !important;
+        background-color: transparent !important;
+    }
     [data-testid="stChatInput"] textarea {
         background: #FFFFFF !important;
         color: #38240D !important;
@@ -185,21 +202,14 @@ st.markdown("""
     }
 
     /* ── File uploader / drop zone ── */
-    .stApp [data-testid="stFileUploader"],
-    .stApp [data-testid="stFileUploader"] div,
-    .stApp [data-testid="stFileUploader"] span,
-    .stApp [data-testid="stFileUploader"] p,
-    .stApp [data-testid="stFileUploader"] label,
-    .stApp [data-testid="stFileUploader"] small,
+    /* Only force white text inside the drop zone section */
     .stApp [data-testid="stFileUploader"] section,
-    .stApp [data-testid="stFileUploader"] section > div,
-    .stApp [data-testid="stFileUploader"] section > div > span,
-    .stApp [data-testid="stFileUploader"] section > div > div,
-    .stApp [data-testid="stFileUploader"] section > div > small,
-    .stApp [data-testid="stFileUploader"] section > button,
-    .stApp [data-testid="stFileUploader"] button,
-    .stApp [data-testid="stFileUploader"] [data-testid="stMarkdownContainer"],
-    .stApp [data-testid="stFileUploader"] [data-testid="stMarkdownContainer"] p {
+    .stApp [data-testid="stFileUploader"] section div,
+    .stApp [data-testid="stFileUploader"] section span,
+    .stApp [data-testid="stFileUploader"] section p,
+    .stApp [data-testid="stFileUploader"] section label,
+    .stApp [data-testid="stFileUploader"] section small,
+    .stApp [data-testid="stFileUploader"] section button {
         color: #FFFFFF !important;
     }
     .stApp [data-testid="stFileUploader"] section {
@@ -211,12 +221,16 @@ st.markdown("""
         border-color: #FFFFFF !important;
         background: #543A14 !important;
     }
-    /* Uploaded file name chip */
+
+    /* Uploaded file list items — keep dark on cream background */
     .stApp [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"],
     .stApp [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] div,
-    .stApp [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] span,
+    .stApp [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] span {
+        color: #38240D !important;
+        background: rgba(255,255,255,0.6) !important;
+    }
     .stApp [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] small {
-        color: #FFFFFF !important;
+        color: #713600 !important;
     }
     .stApp [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] button svg {
         fill: #C05800 !important;
