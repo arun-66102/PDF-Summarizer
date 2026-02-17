@@ -31,22 +31,22 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
     }
 
-    /* ── Text contrast — dark on light blossom ── */
+    /* ── Text contrast — dark brown on cream ── */
     .stApp, .stApp p, .stApp span, .stApp li, .stApp td, .stApp th,
     .stApp label, .stApp div {
-        color: #2B1015 !important;
+        color: #38240D !important;
     }
     .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6 {
-        color: #3D1525 !important;
+        color: #38240D !important;
     }
     .stApp strong, .stApp b {
-        color: #5C2340 !important;
+        color: #C05800 !important;
     }
     .stApp a {
-        color: #D4536A !important;
+        color: #C05800 !important;
     }
     .stApp code {
-        color: #5C2340 !important;
+        color: #C05800 !important;
         background: rgba(255,255,255,0.5) !important;
     }
 
@@ -55,59 +55,61 @@ st.markdown("""
     [data-testid="stChatMessage"] li,
     [data-testid="stChatMessage"] span,
     [data-testid="stChatMessage"] div {
-        color: #2B1015 !important;
+        color: #38240D !important;
     }
     [data-testid="stChatMessage"] strong,
     [data-testid="stChatMessage"] b {
-        color: #5C2340 !important;
+        color: #C05800 !important;
     }
 
     /* Streamlit captions / small text */
     .stApp .stCaption, .stApp [data-testid="stCaptionContainer"] {
-        color: #8B5A6A !important;
+        color: #713600 !important;
     }
 
-    /* Result section text override — stays readable on mint */
+    /* Result section text override */
     .result-section p, .result-section span, .result-section li,
     .result-section div {
-        color: #1A3D20 !important;
+        color: #38240D !important;
     }
     .routing-section p, .routing-section span, .routing-section div {
-        color: #1A3D20 !important;
+        color: #38240D !important;
     }
     .email-section p, .email-section span, .email-section div {
-        color: #3D1525 !important;
+        color: #38240D !important;
     }
 
     /* Download button text */
     .stApp .stDownloadButton button {
-        color: #3D1525 !important;
-        border-color: #FFB7C5 !important;
+        color: #38240D !important;
+        border-color: #C05800 !important;
         background: rgba(255,255,255,0.7) !important;
     }
     .stApp .stDownloadButton button:hover {
-        background: #FFB7C5 !important;
+        background: #C05800 !important;
+        color: #FDFBD4 !important;
     }
 
     /* Error / success / info boxes */
     .stApp .stAlert p {
         color: inherit !important;
     }
+
     /* ── Global Streamlit button override ── */
     .stApp button[kind="secondary"],
     .stApp button[kind="primary"],
     .stApp .stButton > button {
         background: rgba(255,255,255,0.75) !important;
-        color: #5C2340 !important;
-        border: 1px solid #FFB7C5 !important;
+        color: #C05800 !important;
+        border: 1px solid #713600 !important;
         border-radius: 10px !important;
         font-weight: 500 !important;
         transition: all 0.2s ease !important;
     }
     .stApp .stButton > button:hover {
-        background: #FFB7C5 !important;
-        color: #3D1525 !important;
-        border-color: #FF8FA3 !important;
+        background: #C05800 !important;
+        color: #FDFBD4 !important;
+        border-color: #38240D !important;
     }
 
     /* ── Chat input container — remove dark wrapper ── */
@@ -126,60 +128,60 @@ st.markdown("""
     [data-testid="stChatInput"],
     [data-testid="stChatInput"] textarea {
         background: #FFFFFF !important;
-        color: #2B1015 !important;
-        border: 2px solid #FFB7C5 !important;
+        color: #38240D !important;
+        border: 2px solid #713600 !important;
         border-radius: 12px !important;
     }
     [data-testid="stChatInput"] textarea::placeholder {
-        color: #B07080 !important;
+        color: #713600 !important;
     }
     [data-testid="stChatInput"] textarea:focus {
-        border-color: #FF8FA3 !important;
-        box-shadow: 0 0 0 3px rgba(255,183,197,0.25) !important;
+        border-color: #C05800 !important;
+        box-shadow: 0 0 0 3px rgba(192,88,0,0.25) !important;
     }
     [data-testid="stChatInput"] button {
-        background: #FFB7C5 !important;
-        color: #3D1525 !important;
+        background: #C05800 !important;
+        color: #FDFBD4 !important;
         border: none !important;
         border-radius: 8px !important;
     }
     [data-testid="stChatInput"] button:hover {
-        background: #FF8FA3 !important;
+        background: #A04A00 !important;
     }
 
     /* ── Sidebar selectbox / dropdown ── */
     section[data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {
-        background: #7A3358 !important;
-        border: 1px solid #9E4570 !important;
+        background: #543A14 !important;
+        border: 1px solid #713600 !important;
         border-radius: 8px !important;
-        color: #FFE0E8 !important;
+        color: #FDFBD4 !important;
     }
     section[data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div:hover {
-        border-color: #FFB7C5 !important;
+        border-color: #C05800 !important;
     }
     section[data-testid="stSidebar"] [data-testid="stSelectbox"] svg {
-        fill: #FFB7C5 !important;
+        fill: #C05800 !important;
     }
 
     /* ── Sidebar checkbox ── */
     section[data-testid="stSidebar"] [data-testid="stCheckbox"] span[data-testid="stCheckbox"]  {
-        color: #FFE0E8 !important;
+        color: #FDFBD4 !important;
     }
     section[data-testid="stSidebar"] .stCheckbox > label > div[data-testid="stMarkdownContainer"] p {
-        color: #FFE0E8 !important;
+        color: #FDFBD4 !important;
     }
     section[data-testid="stSidebar"] input[type="checkbox"] {
-        accent-color: #FFB7C5 !important;
+        accent-color: #C05800 !important;
     }
 
     /* ── Sidebar slider ── */
     section[data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stThumbValue"],
     section[data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stTickBarMin"],
     section[data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stTickBarMax"] {
-        color: #FFE0E8 !important;
+        color: #FDFBD4 !important;
     }
     section[data-testid="stSidebar"] .stSlider > div > div > div > div {
-        background: #FFB7C5 !important;
+        background: #C05800 !important;
     }
 
     /* ── File uploader / drop zone ── */
@@ -201,13 +203,13 @@ st.markdown("""
         color: #FFFFFF !important;
     }
     .stApp [data-testid="stFileUploader"] section {
-        background: #5C2340 !important;
-        border: 2px dashed #FFB7C5 !important;
+        background: #38240D !important;
+        border: 2px dashed #C05800 !important;
         border-radius: 12px !important;
     }
     .stApp [data-testid="stFileUploader"] section:hover {
         border-color: #FFFFFF !important;
-        background: #6E2D50 !important;
+        background: #543A14 !important;
     }
     /* Uploaded file name chip */
     .stApp [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"],
@@ -217,27 +219,27 @@ st.markdown("""
         color: #FFFFFF !important;
     }
     .stApp [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] button svg {
-        fill: #FFB7C5 !important;
+        fill: #C05800 !important;
     }
 
     /* ── Hide Streamlit chrome ── */
     #MainMenu, footer, header { visibility: hidden; }
     .stDeployButton { display: none; }
 
-    /* ── Cherry Blossom background ── */
+    /* ── Chocolate Truffle background ── */
     .stApp {
-        background: #F2C7C7;
+        background: #FDFBD4;
     }
 
-    /* ── Sidebar — deep rose ── */
+    /* ── Sidebar — dark brown ── */
     section[data-testid="stSidebar"] {
-        background: #5C2340;
-        border-right: 1px solid #7A3358;
+        background: #38240D;
+        border-right: 1px solid #543A14;
     }
     section[data-testid="stSidebar"] .stSelectbox label,
     section[data-testid="stSidebar"] .stCheckbox label,
     section[data-testid="stSidebar"] .stSlider label {
-        color: #F2C7C7 !important;
+        color: #FDFBD4 !important;
         font-size: 0.82rem !important;
     }
     section[data-testid="stSidebar"] p,
@@ -249,16 +251,16 @@ st.markdown("""
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3,
     section[data-testid="stSidebar"] h4 {
-        color: #FFE0E8 !important;
+        color: #FDFBD4 !important;
     }
     section[data-testid="stSidebar"] a {
-        color: #FFB7C5 !important;
+        color: #C05800 !important;
     }
     section[data-testid="stSidebar"] hr {
-        border-color: #7A3358;
+        border-color: #543A14;
     }
     section[data-testid="stSidebar"] button {
-        color: #FFE0E8 !important;
+        color: #FDFBD4 !important;
     }
 
     /* ── Centered chat container ── */
@@ -281,32 +283,32 @@ st.markdown("""
     }
     .welcome-hero .logo {
         width: 64px; height: 64px;
-        background: linear-gradient(135deg, #FFB7C5, #FF8FA3);
+        background: linear-gradient(135deg, #C05800, #A04A00);
         border-radius: 18px;
         display: flex; align-items: center; justify-content: center;
         font-size: 1.8rem;
         margin-bottom: 1.25rem;
-        box-shadow: 0 8px 30px rgba(255,183,197,0.4);
+        box-shadow: 0 8px 30px rgba(192,88,0,0.3);
     }
     .welcome-hero .logo-img {
         width: 120px;
         height: auto;
         margin-bottom: 1.5rem;
-        filter: drop-shadow(0 8px 24px rgba(255,183,197,0.35));
+        filter: drop-shadow(0 8px 24px rgba(192,88,0,0.35));
         transition: transform 0.3s ease;
     }
     .welcome-hero .logo-img:hover {
         transform: scale(1.05);
     }
     .welcome-hero h2 {
-        color: #3D1525;
+        color: #38240D;
         font-weight: 700;
         font-size: 1.7rem;
         margin: 0 0 0.4rem;
         letter-spacing: -0.02em;
     }
     .welcome-hero .sub {
-        color: #8B5A6A;
+        color: #713600;
         font-size: 0.9rem;
         margin-bottom: 2rem;
     }
@@ -328,23 +330,23 @@ st.markdown("""
         transition: all 0.2s ease;
     }
     .suggestion-card:hover {
-        border-color: #FFB7C5;
+        border-color: #C05800;
         background: rgba(255,255,255,0.92);
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255,183,197,0.2);
+        box-shadow: 0 6px 20px rgba(192,88,0,0.2);
     }
     .suggestion-card .s-icon {
         font-size: 1.1rem;
         margin-bottom: 0.3rem;
     }
     .suggestion-card .s-title {
-        color: #3D1525;
+        color: #38240D;
         font-size: 0.82rem;
         font-weight: 600;
         line-height: 1.35;
     }
     .suggestion-card .s-desc {
-        color: #8B5A6A;
+        color: #713600;
         font-size: 0.72rem;
         margin-top: 0.15rem;
     }
@@ -360,15 +362,15 @@ st.markdown("""
     /* Chat avatar icons */
     [data-testid="stChatMessage"] [data-testid="chatAvatarIcon-user"],
     [data-testid="stChatMessage"] img[data-testid="chatAvatarIcon-user"] {
-        background: linear-gradient(135deg, #FFB7C5, #FF8FA3) !important;
+        background: linear-gradient(135deg, #C05800, #A04A00) !important;
         border-radius: 12px !important;
-        box-shadow: 0 3px 10px rgba(255,183,197,0.3);
+        box-shadow: 0 3px 10px rgba(192,88,0,0.3);
     }
     [data-testid="stChatMessage"] [data-testid="chatAvatarIcon-assistant"],
     [data-testid="stChatMessage"] img[data-testid="chatAvatarIcon-assistant"] {
-        background: linear-gradient(135deg, #5C2340, #7A3358) !important;
+        background: linear-gradient(135deg, #38240D, #543A14) !important;
         border-radius: 12px !important;
-        box-shadow: 0 3px 10px rgba(92,35,64,0.3);
+        box-shadow: 0 3px 10px rgba(56,36,13,0.3);
     }
     /* Avatar container */
     [data-testid="stChatMessage"] > div:first-child {
@@ -378,16 +380,16 @@ st.markdown("""
         background: transparent !important;
     }
 
-    /* User message bubble — blossom pink */
+    /* User message bubble — burnt orange */
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
         background: transparent !important;
     }
     .user-bubble {
-        background: linear-gradient(135deg, #FFB7C5, #FF8FA3);
+        background: linear-gradient(135deg, #C05800, #A04A00);
         border: none;
         border-radius: 18px 18px 4px 18px;
         padding: 0.75rem 1rem;
-        color: #3D1525;
+        color: #FDFBD4;
         font-size: 0.9rem;
         font-weight: 500;
         line-height: 1.55;
@@ -395,14 +397,15 @@ st.markdown("""
         max-width: 85%;
         float: right;
         clear: both;
-        box-shadow: 0 4px 14px rgba(255,183,197,0.3);
+        box-shadow: 0 4px 14px rgba(192,88,0,0.3);
     }
     .user-time {
         text-align: right;
-        color: #B07080;
+        color: #FDFBD4;
         font-size: 0.68rem;
         margin-top: 0.25rem;
         clear: both;
+        opacity: 0.8;
     }
 
     /* Assistant message */
@@ -415,18 +418,18 @@ st.markdown("""
     .assistant-header .name {
         font-size: 0.78rem;
         font-weight: 700;
-        color: #5C2340;
+        color: #C05800;
     }
     .assistant-header .time {
         font-size: 0.68rem;
-        color: #B07080;
+        color: #713600;
     }
 
-    /* ── Result sections — mint green glass ── */
+    /* ── Result sections — white glass ── */
     .result-section {
-        background: rgba(213,243,216,0.5);
+        background: rgba(255,255,255,0.5);
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(213,243,216,0.7);
+        border: 1px solid rgba(192,88,0,0.3);
         border-radius: 12px;
         padding: 1rem 1.15rem;
         margin: 0.6rem 0;
@@ -435,18 +438,18 @@ st.markdown("""
         margin: 0 0 0.5rem;
         font-size: 0.85rem;
         font-weight: 600;
-        color: #2A5A30;
+        color: #C05800;
     }
     .routing-section {
-        background: linear-gradient(135deg, rgba(255,255,255,0.65), rgba(213,243,216,0.4));
-        border: 1px solid #A8E6B0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.65), rgba(253,251,212,0.4));
+        border: 1px solid #713600;
         border-radius: 12px;
         padding: 1rem 1.15rem;
         margin: 0.6rem 0;
     }
     .email-section {
-        background: linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,183,197,0.2));
-        border: 1px solid #FFB7C5;
+        background: linear-gradient(135deg, rgba(255,255,255,0.65), rgba(192,88,0,0.2));
+        border: 1px solid #C05800;
         border-radius: 12px;
         padding: 1rem 1.15rem;
         margin: 0.6rem 0;
@@ -464,16 +467,16 @@ st.markdown("""
         align-items: center;
         gap: 0.3rem;
         background: #FFFFFF;
-        border: 1px solid #F2C7C7;
+        border: 1px solid #C05800;
         border-radius: 999px;
         padding: 0.25rem 0.7rem;
         font-size: 0.76rem;
         font-weight: 500;
-        color: #5C2340;
+        color: #38240D;
         animation: fadeUp 0.3s ease;
     }
     .doc-chip .chip-size {
-        color: #B07080;
+        color: #713600;
         font-size: 0.66rem;
     }
     @keyframes fadeUp {
@@ -484,71 +487,71 @@ st.markdown("""
     /* ── Sidebar badges ── */
     .badge-ok {
         display: inline-flex; align-items: center; gap: 0.25rem;
-        background: rgba(213,243,216,0.3); border: 1px solid #A8E6B0;
+        background: rgba(22,163,74,0.2); border: 1px solid #16a34a;
         color: #4ade80; border-radius: 8px;
         padding: 0.2rem 0.55rem; font-size: 0.72rem; font-weight: 500;
     }
     .badge-warn {
         display: inline-flex; align-items: center; gap: 0.25rem;
-        background: rgba(255,183,100,0.2); border: 1px solid #FFB76450;
+        background: rgba(234,88,12,0.2); border: 1px solid #ea580c;
         color: #fb923c; border-radius: 8px;
         padding: 0.2rem 0.55rem; font-size: 0.72rem; font-weight: 500;
     }
     .badge-err {
         display: inline-flex; align-items: center; gap: 0.25rem;
-        background: rgba(255,100,100,0.2); border: 1px solid #FF646450;
+        background: rgba(220,38,38,0.2); border: 1px solid #dc2626;
         color: #f87171; border-radius: 8px;
         padding: 0.2rem 0.55rem; font-size: 0.72rem; font-weight: 500;
     }
 
-    /* ── New Chat button — Cherry Blossom Theme ── */
+    /* ── New Chat button — Chocolate Truffle Theme ── */
     .new-chat-btn button {
-        background: #7A3358 !important;
-        border: 1px solid #FFB7C5 !important;
-        color: #FFE0E8 !important;
+        background: #543A14 !important;
+        border: 1px solid #C05800 !important;
+        color: #FDFBD4 !important;
         border-radius: 12px !important;
         font-weight: 600 !important;
         font-size: 0.9rem !important;
         padding: 0.4rem 1rem !important;
         transition: all 0.2s ease !important;
-        box-shadow: 0 4px 12px rgba(92,35,64,0.3) !important;
+        box-shadow: 0 4px 12px rgba(56,36,13,0.3) !important;
     }
     .new-chat-btn button:hover {
-        background: #FFB7C5 !important;
-        color: #3D1525 !important;
-        border-color: #FF8FA3 !important;
+        background: #C05800 !important;
+        color: #FDFBD4 !important;
+        border-color: #38240D !important;
         transform: translateY(-1px) !important;
-        box-shadow: 0 6px 16px rgba(255,183,197,0.3) !important;
+        box-shadow: 0 6px 16px rgba(192,88,0,0.3) !important;
     }
 
     /* ── Sidebar selectbox / dropdown — refined ── */
     section[data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {
-        background: #5C2340 !important;
-        border: 1px solid #FFB7C5 !important;
+        background: #543A14 !important;
+        border: 1px solid #C05800 !important;
         border-radius: 10px !important;
-        color: #FFE0E8 !important;
+        color: #FDFBD4 !important;
         font-weight: 500 !important;
     }
     section[data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div:hover {
         border-color: #FFFFFF !important;
-        background: #6E2D50 !important;
+        background: #C05800 !important;
     }
     section[data-testid="stSidebar"] [data-testid="stSelectbox"] svg {
-        fill: #FFB7C5 !important;
+        fill: #FDFBD4 !important;
     }
     /* Dropdown menu items */
     ul[data-testid="stSelectboxVirtualDropdown"] {
-        background: #5C2340 !important;
-        border: 1px solid #FFB7C5 !important;
+        background: #543A14 !important;
+        border: 1px solid #C05800 !important;
     }
     ul[data-testid="stSelectboxVirtualDropdown"] li {
-        background: #5C2340 !important;
-        color: #FFE0E8 !important;
+        background: #543A14 !important;
+        color: #FDFBD4 !important;
     }
     ul[data-testid="stSelectboxVirtualDropdown"] li:hover,
     ul[data-testid="stSelectboxVirtualDropdown"] li[aria-selected="true"] {
-        background: #FFB7C5 !important;
-        color: #3D1525 !important;
+        background: #C05800 !important;
+        color: #FDFBD4 !important;
     }
 
     /* ── Metrics styling — white glass ── */
@@ -560,11 +563,11 @@ st.markdown("""
         padding: 0.6rem 0.8rem;
     }
     [data-testid="stMetricLabel"] {
-        color: #8B5A6A !important;
+        color: #713600 !important;
         font-size: 0.72rem !important;
     }
     [data-testid="stMetricValue"] {
-        color: #3D1525 !important;
+        color: #38240D !important;
         font-size: 0.95rem !important;
     }
 
@@ -572,19 +575,19 @@ st.markdown("""
     .app-footer {
         text-align: center;
         padding: 0.5rem 0 1rem;
-        color: #B07080;
+        color: #713600;
         font-size: 0.7rem;
     }
-    .app-footer span { color: #D4536A; font-weight: 600; }
+    .app-footer span { color: #C05800; font-weight: 600; }
 
     /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb {
-        background: #FFB7C5;
+        background: #C05800;
         border-radius: 3px;
     }
-    ::-webkit-scrollbar-thumb:hover { background: #FF8FA3; }
+    ::-webkit-scrollbar-thumb:hover { background: #A04A00; }
 
     /* ── Message fade-in ── */
     @keyframes msgFade {
@@ -597,15 +600,15 @@ st.markdown("""
 
     /* ── Expander in sidebar ── */
     section[data-testid="stSidebar"] .streamlit-expanderHeader {
-        color: #F2C7C7 !important;
+        color: #FDFBD4 !important;
         font-size: 0.82rem !important;
         font-weight: 500 !important;
     }
 
-    /* ── Doc send button — blossom gradient ── */
+    /* ── Doc send button — chocolate orange gradient ── */
     .doc-send-btn button {
-        background: linear-gradient(135deg, #FFB7C5, #FF8FA3) !important;
-        color: #3D1525 !important;
+        background: linear-gradient(135deg, #C05800, #A04A00) !important;
+        color: #FDFBD4 !important;
         border: none !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
@@ -613,16 +616,16 @@ st.markdown("""
         padding: 0.55rem 1.25rem !important;
         animation: pulse-send 1.8s ease-in-out infinite;
         transition: all 0.25s ease !important;
-        box-shadow: 0 4px 16px rgba(255,183,197,0.35);
+        box-shadow: 0 4px 16px rgba(192,88,0,0.35);
     }
     .doc-send-btn button:hover {
         transform: scale(1.03) !important;
-        box-shadow: 0 6px 28px rgba(255,143,163,0.4) !important;
-        background: linear-gradient(135deg, #FF8FA3, #FF6B85) !important;
+        box-shadow: 0 6px 28px rgba(192,88,0,0.4) !important;
+        background: linear-gradient(135deg, #A04A00, #C05800) !important;
     }
     @keyframes pulse-send {
-        0%, 100% { box-shadow: 0 4px 16px rgba(255,183,197,0.3); }
-        50% { box-shadow: 0 4px 24px rgba(255,183,197,0.5); }
+        0%, 100% { box-shadow: 0 4px 16px rgba(192,88,0,0.3); }
+        50% { box-shadow: 0 4px 24px rgba(192,88,0,0.5); }
     }
 </style>
 """, unsafe_allow_html=True)
