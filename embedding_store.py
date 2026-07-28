@@ -1,5 +1,7 @@
-import chromadb
 import os
+os.environ["USE_TF"] = "0"
+os.environ["USE_TORCH"] = "1"
+import chromadb
 from sentence_transformers import SentenceTransformer
 from department_corpus import build_department_documents
 

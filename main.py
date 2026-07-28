@@ -1,3 +1,6 @@
+import os
+os.environ["USE_TF"] = "0"
+os.environ["USE_TORCH"] = "1"
 import logging
 from typing import Optional
 from pdf_extractor import extract_text_from_pdf, needs_ocr, ocr_text_from_pdf
@@ -11,7 +14,7 @@ try:
     ROUTING_AVAILABLE = True
     logger = logging.getLogger(__name__)
     logger.info("✅ Document routing available (with embeddings)")
-except ImportError as e:
+except (ImportError, RuntimeError) as e:
     ROUTING_AVAILABLE = False
     logger = logging.getLogger(__name__)
     logger.warning(f"⚠️  Document routing not available: {e}")
@@ -188,7 +191,7 @@ def process_pdf(
         
         # Document routing (if enabled)
         routing_result = None
-        if enable_routing and ROUTING_AVAILABLE:
+        if enable_routing:
             try:
                 logger.info("Routing document to department...")
                 routing_result = classify_text_to_department_with_confidence(final_summary, top_k=3)
@@ -326,7 +329,7 @@ def process_text(
         
         # Document routing (if enabled)
         routing_result = None
-        if enable_routing and ROUTING_AVAILABLE:
+        if enable_routing:
             try:
                 logger.info("Routing document to department...")
                 routing_result = classify_text_to_department_with_confidence(final_summary, top_k=3)
