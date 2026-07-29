@@ -4,6 +4,9 @@ from typing import List
 from collections import Counter
 
 def clean_extracted_text(raw_text: str) -> str:
+    if not raw_text or not raw_text.strip():
+        return ""
+
     # Normalize line endings
     text = raw_text.replace('\r', '\n')
 
@@ -14,33 +17,41 @@ def clean_extracted_text(raw_text: str) -> str:
     text = re.sub(r'Page\s+\d+', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\b\d+\s*/\s*\d+\b', '', text)
     text = re.sub(r'[-–—]\s*\d+\s*[-–—]', '', text)
-    text = re.sub(r'^\d+$', '', text, flags=re.MULTILINE)
 
-    # Remove repeated headers and footers
     lines = text.split('\n')
     line_counts = Counter(line.strip() for line in lines if line.strip())
-    cleaned_lines = [
-        line for line in lines
-        if line_counts[line.strip()] < 2 or len(line.strip()) > 50
-    ]
+
+    # Only strip lines that repeat 5+ times AND are short (running header/footer)
+    cleaned_lines = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            cleaned_lines.append("")
+            continue
+        if line_counts[stripped] >= 5 and len(stripped) < 60:
+            continue
+        cleaned_lines.append(stripped)
 
     # Merge broken OCR lines
     merged_lines = []
     for line in cleaned_lines:
-        line = line.strip()
         if not line:
             merged_lines.append("")
             continue
-        if merged_lines and not merged_lines[-1].endswith(('.', ':', '?')):
+        if merged_lines and merged_lines[-1] and not merged_lines[-1].endswith(('.', ':', '?', '!')):
             merged_lines[-1] += ' ' + line
         else:
             merged_lines.append(line)
 
     # Normalize blank lines
-    text = '\n'.join(merged_lines)
-    text = re.sub(r'\n{2,}', '\n\n', text)
+    cleaned_result = '\n'.join(merged_lines)
+    cleaned_result = re.sub(r'\n{2,}', '\n\n', cleaned_result).strip()
 
-    return text.strip()
+    # Safety fallback: if cleaning emptied the text, return original text
+    if not cleaned_result and raw_text.strip():
+        return re.sub(r'\n{2,}', '\n\n', raw_text.replace('\r', '\n')).strip()
+
+    return cleaned_result
 
 def count_tokens(text: str, model_name: str = "gpt-4") -> int:
     """
@@ -53,7 +64,6 @@ def split_into_sections(text: str) -> List[str]:
     """
     Splits text using headings and paragraph boundaries.
     """
-    # Split on headings or double newlines
     sections = re.split(r'\n{2,}|(?=\n[A-Z][^\n]{3,}\n)', text)
     return [sec.strip() for sec in sections if sec.strip()]
 

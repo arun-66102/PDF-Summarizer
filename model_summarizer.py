@@ -251,20 +251,23 @@ def generate_final_summary(
 ) -> Optional[str]:
     """
     Combines chunk summaries into a final coherent summary.
-    
-    Args:
-        chunk_summaries: List of chunk summaries
-        model: Model name to use for final summarization
-        
-    Returns:
-        Final summary or None if generation fails
     """
-    # Filter out failed summaries
-    valid_summaries = [s for s in chunk_summaries if s and not s.startswith("Failed to summarize") and s != "No content to summarize"]
+    # Filter out failed or empty placeholder summaries
+    valid_summaries = [
+        s for s in chunk_summaries 
+        if s and not s.startswith("Failed to summarize") 
+        and "no content to summarize" not in s.lower()
+        and "no information to summarize" not in s.lower()
+    ]
     
     if not valid_summaries:
         logger.error("No valid summaries to combine")
-        return None
+        return "No readable content or text could be extracted from this document."
+
+    # Single chunk — return chunk summary directly without extra LLM call
+    if len(valid_summaries) == 1:
+        logger.info("Single summary chunk available, using directly")
+        return valid_summaries[0]
     
     combined = "\n\n".join(valid_summaries)
     
@@ -290,7 +293,8 @@ Partial Summaries:
     
     if final_summary:
         logger.info("Final summary generated successfully")
+        return final_summary
     else:
         logger.error("Failed to generate final summary")
-    
-    return final_summary
+        return valid_summaries[0]  # Fallback to first chunk summary if merge fails
+
