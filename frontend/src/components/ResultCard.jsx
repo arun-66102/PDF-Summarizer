@@ -18,57 +18,86 @@ export default function ResultCard({ result, source: _source }) {
 
   if (hasError) {
     return (
-      <div className="result-section" style={{ borderColor: '#dc2626' }}>
-        <h4>❌ Error</h4>
-        <p>{result.summary || result.error || 'Unknown error'}</p>
+      <div className="result-card-container error-state">
+        <div className="result-header">
+          <h3 className="result-title error-text">Processing Error</h3>
+        </div>
+        <p className="error-body">{result.summary || result.error || 'Unknown processing error'}</p>
       </div>
     );
   }
 
   return (
-    <div>
-      {/* Summary */}
-      <div className="result-section">
-        <h4>📝 Summary</h4>
-        <div style={{ whiteSpace: 'pre-wrap' }}>{summaryText}</div>
+    <div className="result-card-container">
+      {/* Summary Header */}
+      <div className="result-header">
+        <div className="result-header-left">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C86D51" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+          <h3 className="result-title">Executive Summary</h3>
+        </div>
+        {summaryText && (
+          <button className="secondary-btn icon-btn" onClick={handleDownload}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download Summary
+          </button>
+        )}
       </div>
 
-      {/* Routing */}
+      {/* Summary Body */}
+      <div className="summary-body-text">{summaryText}</div>
+
+      {/* Routing Target */}
       {primaryDepts.length > 0 && (
-        <div className="routing-section">
-          <p>
-            <strong>🎯 Routed to{routing.is_tie ? ' (tie)' : ''}:</strong>{' '}
-            {primaryDepts.join(', ')}
-          </p>
-          <p className="caption">
-            {routing.method || '?'} · confidence{' '}
-            {(routing.confidence || 0).toFixed(3)}
-          </p>
+        <div className="routed-dept-box">
+          <div>
+            <div className="routing-label-text">
+              Classification Engine ({routing.method || 'Cosine Similarity'})
+            </div>
+            <div className="routing-confidence-text">
+              Confidence Score: {(routing.confidence || 0).toFixed(3)}
+            </div>
+          </div>
+          <div className="routed-dept-tags">
+            {primaryDepts.map((d) => (
+              <span key={d} className="dept-pill-badge">
+                {d}
+              </span>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Metrics */}
+      {/* Metrics Row */}
       <div className="metrics-row">
-        <div className="metric-card">
-          <div className="metric-label">Length</div>
-          <div className="metric-value">{result.text_length ?? '—'}</div>
+        <div className="metric-box">
+          <div className="metric-box-info">
+            <span className="metric-box-label">Character Length</span>
+            <span className="metric-box-val">{result.text_length ?? '—'}</span>
+          </div>
         </div>
-        <div className="metric-card">
-          <div className="metric-label">Chunks</div>
-          <div className="metric-value">{result.chunks_processed ?? '—'}</div>
+        <div className="metric-box">
+          <div className="metric-box-info">
+            <span className="metric-box-label">Processed Chunks</span>
+            <span className="metric-box-val">{result.chunks_processed ?? '—'}</span>
+          </div>
         </div>
-        <div className="metric-card">
-          <div className="metric-label">Model</div>
-          <div className="metric-value">{result.model_used ?? '—'}</div>
+        <div className="metric-box">
+          <div className="metric-box-info">
+            <span className="metric-box-label">Active LLM Model</span>
+            <span className="metric-box-val">{result.model_used ?? '—'}</span>
+          </div>
         </div>
       </div>
-
-      {/* Download */}
-      {summaryText && (
-        <button className="btn-download" onClick={handleDownload}>
-          💾 Download Summary
-        </button>
-      )}
     </div>
   );
 }

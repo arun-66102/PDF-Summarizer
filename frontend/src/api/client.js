@@ -1,14 +1,11 @@
 /**
  * RouteX API Client
- * Plain fetch wrapper — no authentication required.
+ * Plain fetch wrapper with real-time history and stats.
  */
 
 const API_BASE = '/api';
 
 // ── Retry helper ──────────────────────────────────────────────────────────────
-// Retries failed requests up to `retries` times with exponential back-off.
-// Handles ECONNREFUSED / network errors gracefully during backend warmup.
-
 async function retryFetch(url, options = {}, retries = 3, delay = 1500) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -21,7 +18,7 @@ async function retryFetch(url, options = {}, retries = 3, delay = 1500) {
   }
 }
 
-// ── Health & Models ───────────────────────────────────────────────────────────
+// ── Health, Models & Telemetry ───────────────────────────────────────────────
 
 export async function getHealth() {
   const res = await retryFetch(`${API_BASE}/health`);
@@ -32,6 +29,18 @@ export async function getHealth() {
 export async function getModels() {
   const res = await retryFetch(`${API_BASE}/models`);
   if (!res.ok) throw new Error('Failed to fetch models');
+  return res.json();
+}
+
+export async function getHistory() {
+  const res = await fetch(`${API_BASE}/history`);
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function getStats() {
+  const res = await fetch(`${API_BASE}/stats`);
+  if (!res.ok) return null;
   return res.json();
 }
 
