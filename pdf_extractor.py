@@ -1,6 +1,13 @@
 import pymupdf
-from pdf2image import convert_from_path
 import numpy as np
+
+# Try to import pdf2image with error handling
+try:
+    from pdf2image import convert_from_path
+    PDF2IMAGE_AVAILABLE = True
+except ImportError as e:
+    print(f"⚠️  pdf2image not available: {e}")
+    PDF2IMAGE_AVAILABLE = False
 
 # Try to import OpenCV with error handling
 try:
@@ -36,9 +43,9 @@ def needs_ocr(text):
     return (readable / len(text)) < 0.4
 
 def ocr_text_from_pdf(pdf_path):
-    if not CV2_AVAILABLE or not TESSERACT_AVAILABLE:
+    if not PDF2IMAGE_AVAILABLE or not CV2_AVAILABLE or not TESSERACT_AVAILABLE:
         print("❌ OCR not available - missing dependencies")
-        return "OCR functionality not available. Please install OpenCV and Tesseract."
+        return "OCR functionality not available. Please install pdf2image, OpenCV, and Tesseract."
     
     try:
         images = convert_from_path(pdf_path, dpi=300)
