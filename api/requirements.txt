@@ -1,0 +1,28 @@
+# RouteX — Vercel serverless requirements
+#
+# Intentionally excludes sentence-transformers, chromadb, pdf2image,
+# opencv-python-headless, and pytesseract because:
+#
+#   - sentence-transformers pulls PyTorch (~500MB) which blows
+#     Vercel's 250MB function size limit.
+#   - chromadb includes onnxruntime (~150MB) — same problem.
+#   - pdf2image, opencv-python-headless, pytesseract require
+#     system binaries (poppler, libGL, tesseract) not available
+#     on Vercel's serverless runtime.
+#
+# What this means at runtime:
+#   - PDF text extraction still works (PyMuPDF direct text layer).
+#   - OCR for scanned-only PDFs is disabled (graceful fallback).
+#   - Department routing falls back to the built-in keyword matcher
+#     in main.py (no embedding model needed).
+#   - Everything else — summarization, email, SSE — works normally.
+
+pymupdf>=1.23.0
+tiktoken>=0.5.0
+requests>=2.31.0
+numpy>=1.24.0
+python-dotenv>=1.0.0
+fastapi>=0.104.0
+uvicorn>=0.24.0
+python-multipart>=0.0.6
+sse-starlette>=1.6.0

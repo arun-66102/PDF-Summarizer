@@ -132,23 +132,15 @@ SMTP_PORT        = 587
 
 ## 🚀 Running RouteX
 
-### Option A — Streamlit UI (simplest)
+### Development (FastAPI + React)
 
-```bash
-streamlit run app.py
-```
-
-Opens at **http://localhost:8501** — the full chat interface with sidebar model selector.
-
-### Option B — Full Stack (FastAPI + React)
-
-Install Node dependencies first:
+Install Node dependencies once:
 
 ```bash
 cd frontend && npm install && cd ..
 ```
 
-Then launch both servers with a single command:
+Then start both servers with a single command:
 
 ```bash
 python run_dev.py
@@ -160,11 +152,32 @@ python run_dev.py
 | FastAPI backend | http://localhost:8000 |
 | Interactive API docs | http://localhost:8000/docs |
 
-### Option C — Backend only
+### Backend only
 
 ```bash
 uvicorn backend.server:app --reload --port 8000
 ```
+
+---
+
+## 🌐 Deploying to Vercel
+
+RouteX is configured for 1-click zero-config deployment on Vercel using `vercel.json`.
+
+1. Install Vercel CLI or connect your GitHub repository to Vercel.
+2. Add the following **Environment Variables** in Vercel project settings:
+   - `GROQ_API_KEY`: Your Groq API key (`gsk_...`)
+   - `EMAIL_SENDER`: Sender email address (e.g. `your_email@gmail.com`)
+   - `EMAIL_PASSWORD`: Gmail App Password
+   - `SMTP_SERVER`: `smtp.gmail.com`
+   - `SMTP_PORT`: `587`
+3. Deploy:
+
+```bash
+vercel --prod
+```
+
+> **Serverless Note**: Large embedding libraries (`sentence-transformers`, `chromadb`) are automatically omitted in `api/requirements.txt` to keep the deployment within Vercel's serverless size limit (250MB). RouteX seamlessly falls back to keyword-based department routing.
 
 ---
 
@@ -244,7 +257,9 @@ DEPARTMENT_EMAILS = {
 
 ---
 
-## 🖥️ Streamlit UI — Sidebar Settings
+## 🖥️ Sidebar Settings
+
+The sidebar in the React frontend exposes the following controls at runtime:
 
 | Setting | Description |
 |---|---|

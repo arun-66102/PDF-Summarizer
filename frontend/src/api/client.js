@@ -1,20 +1,36 @@
 /**
  * RouteX API Client
- * Wraps fetch calls to the FastAPI backend.
+ * Plain fetch wrapper — no authentication required.
  */
 
 const API_BASE = '/api';
 
-// ── Health & Models (public) ──────────────────────────────────────────────────
+// ── Retry helper ──────────────────────────────────────────────────────────────
+// Retries failed requests up to `retries` times with exponential back-off.
+// Handles ECONNREFUSED / network errors gracefully during backend warmup.
+
+async function retryFetch(url, options = {}, retries = 3, delay = 1500) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url, options);
+      return res;
+    } catch (err) {
+      if (attempt === retries) throw err;
+      await new Promise((r) => setTimeout(r, delay * (attempt + 1)));
+    }
+  }
+}
+
+// ── Health & Models ───────────────────────────────────────────────────────────
 
 export async function getHealth() {
-  const res = await fetch(`${API_BASE}/health`);
+  const res = await retryFetch(`${API_BASE}/health`);
   if (!res.ok) throw new Error('Health check failed');
   return res.json();
 }
 
 export async function getModels() {
-  const res = await fetch(`${API_BASE}/models`);
+  const res = await retryFetch(`${API_BASE}/models`);
   if (!res.ok) throw new Error('Failed to fetch models');
   return res.json();
 }
@@ -24,9 +40,7 @@ export async function getModels() {
 export async function processText(text, options = {}) {
   const res = await fetch(`${API_BASE}/process/text`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       text,
       model: options.model || 'llama3-8b',
@@ -74,9 +88,7 @@ export function streamProgress(taskId, onProgress) {
     try {
       const data = JSON.parse(event.data);
       onProgress(data);
-      if (data.done) {
-        eventSource.close();
-      }
+      if (data.done) eventSource.close();
     } catch (e) {
       console.error('SSE parse error:', e);
     }
@@ -92,9 +104,7 @@ export function streamProgress(taskId, onProgress) {
     eventSource.close();
   });
 
-  eventSource.onerror = () => {
-    eventSource.close();
-  };
+  eventSource.onerror = () => eventSource.close();
 
   return eventSource;
 }
@@ -104,9 +114,7 @@ export function streamProgress(taskId, onProgress) {
 export async function sendEmail(summary, routing, pdfPath) {
   const res = await fetch(`${API_BASE}/email`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       summary,
       routing,

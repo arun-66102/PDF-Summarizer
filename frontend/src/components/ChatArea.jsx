@@ -39,7 +39,7 @@ export default function ChatArea({
     e.target.value = '';
   };
 
-  const handleSend = async (forceProcessDocs = false) => {
+  const handleSend = async (_forceProcessDocs = false) => {
     const hasDocs = attachedDocs.length > 0;
     const hasText = inputText.trim().length > 0;
 
@@ -131,7 +131,16 @@ export default function ChatArea({
       <div className="main-content">
         <div className="chat-container">
           <div className="welcome-hero">
-            <div className="logo-fallback">🤖</div>
+            <img
+              src="/logo.png"
+              alt="RouteX"
+              className="logo-img"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            <div className="logo-fallback" style={{ display: 'none' }}>🤖</div>
             <h2>What can I help with?</h2>
             <p className="sub">
               Upload a PDF or paste text — I'll summarize, analyze, and route it.

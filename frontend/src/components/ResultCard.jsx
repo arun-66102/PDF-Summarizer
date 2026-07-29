@@ -1,4 +1,4 @@
-export default function ResultCard({ result, source }) {
+export default function ResultCard({ result, source: _source }) {
   if (!result) return null;
 
   const hasError = result.error && !result.routing;

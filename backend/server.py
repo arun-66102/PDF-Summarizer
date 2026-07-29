@@ -1,8 +1,8 @@
 """
 RouteX — FastAPI backend server.
 
-Wraps the existing processing pipeline (main.py) with REST endpoints,
-JWT authentication, and SSE progress streaming.
+Wraps the existing processing pipeline (main.py) with REST endpoints
+and SSE progress streaming.
 
 Start with:
     uvicorn backend.server:app --reload --port 8000
@@ -14,10 +14,8 @@ import uuid
 import asyncio
 import tempfile
 import logging
-from typing import Optional
-from datetime import datetime
 
-from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
 import json
@@ -29,13 +27,11 @@ if PROJECT_ROOT not in sys.path:
 
 from main import process_pdf, process_text, send_pdf_to_departments, ROUTING_AVAILABLE
 from backend.schemas import (
-    LoginRequest, TokenResponse,
     ProcessTextRequest, ProcessResponse,
     EmailRequest, EmailResponse,
     HealthResponse, ModelsResponse, ModelInfo,
     RoutingResult,
 )
-from backend.auth import authenticate, create_token, require_auth, _TOKEN_EXPIRY
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +45,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -69,23 +65,7 @@ MODEL_OPTIONS = {
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# AUTH
-# ═══════════════════════════════════════════════════════════════════════════════
-
-@app.post("/api/auth/login", response_model=TokenResponse)
-async def login(body: LoginRequest):
-    token = authenticate(body.username, body.password)
-    if token is None:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    return TokenResponse(
-        access_token=token,
-        token_type="bearer",
-        expires_in=_TOKEN_EXPIRY,
-    )
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# HEALTH & MODELS (public — no auth required)
+# HEALTH & MODELS
 # ═══════════════════════════════════════════════════════════════════════════════
 
 @app.get("/api/health", response_model=HealthResponse)
@@ -110,7 +90,7 @@ async def models():
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# PROCESS TEXT (authenticated)
+# PROCESS TEXT
 # ═══════════════════════════════════════════════════════════════════════════════
 
 @app.post("/api/process/text", response_model=ProcessResponse)
@@ -268,7 +248,7 @@ async def stream_progress(task_id: str):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# EMAIL (authenticated)
+# EMAIL
 # ═══════════════════════════════════════════════════════════════════════════════
 
 @app.post("/api/email", response_model=EmailResponse)
