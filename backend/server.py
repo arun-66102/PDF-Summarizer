@@ -68,6 +68,11 @@ MODEL_OPTIONS = {
 # HEALTH & MODELS
 # ═══════════════════════════════════════════════════════════════════════════════
 
+@app.get("/api")
+async def api_root():
+    return {"message": "RouteX API is running", "version": "2.0.0", "docs": "/api/docs"}
+
+
 @app.get("/api/health", response_model=HealthResponse)
 async def health():
     groq_ok = bool(os.getenv("GROQ_API_KEY"))
