@@ -269,17 +269,13 @@ async def send_email(
         )
 
     pdf_path = body.pdf_path
-    if not pdf_path or not os.path.exists(pdf_path):
-        return EmailResponse(
-            success=False,
-            message="PDF file not found on server. Re-upload and process first.",
-        )
+    valid_pdf_path = pdf_path if (pdf_path and os.path.exists(pdf_path)) else None
 
     routing_dict = body.routing.model_dump()
 
     success = await asyncio.to_thread(
         send_pdf_to_departments,
-        pdf_path,
+        valid_pdf_path,
         body.summary,
         routing_dict,
     )
@@ -288,13 +284,13 @@ async def send_email(
         return EmailResponse(
             success=True,
             sent_to=primary_depts,
-            message=f"Emails sent to {len(primary_depts)} department(s)",
+            message=f"Email summary sent to {len(primary_depts)} department(s)",
         )
     else:
         return EmailResponse(
             success=False,
             failed=primary_depts,
-            message="Email sending failed",
+            message="Email sending failed. Please verify EMAIL_SENDER and EMAIL_PASSWORD environment variables in Vercel.",
         )
 
 
