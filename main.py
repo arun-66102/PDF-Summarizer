@@ -198,25 +198,50 @@ def process_pdf(
         
         # Extract text
         text_content = extract_text_from_pdf(file_path)
-        
+
         # Check if OCR is needed
         ocr_text = ""
         if needs_ocr(text_content):
-            logger.info("OCR required, performing OCR...")
+            logger.info("Scanned document detected, attempting OCR...")
             ocr_text = ocr_text_from_pdf(file_path)
         else:
             logger.info("Text extraction sufficient, skipping OCR")
             ocr_text = text_content
-        
+
+        # Handle unextractable / scanned image PDFs
+        if ocr_text == "SCANNED_DOCUMENT_NO_TEXT" or not ocr_text.strip():
+            logger.warning("Scanned document without text layer detected")
+            return {
+                "summary": "This document appears to be a scanned image PDF without selectable text. To summarize, please upload a searchable PDF or paste the text content directly.",
+                "routing": {
+                    "primary_departments": [],
+                    "all_matches": [],
+                    "confidence": 0.0,
+                    "is_tie": False,
+                    "tie_threshold": 0.05,
+                    "method": "none",
+                    "available": True
+                },
+                "error": "No text layer found"
+            }
+
         # Clean the extracted text
         cleaned_text = clean_extracted_text(ocr_text)
         logger.info(f"Cleaned text length: {len(cleaned_text)} characters")
-        
+
         if not cleaned_text.strip():
             logger.warning("No meaningful text extracted from PDF")
             return {
-                "summary": "No meaningful content found in PDF",
-                "routing": None,
+                "summary": "No readable text content could be extracted from this PDF.",
+                "routing": {
+                    "primary_departments": [],
+                    "all_matches": [],
+                    "confidence": 0.0,
+                    "is_tie": False,
+                    "tie_threshold": 0.05,
+                    "method": "none",
+                    "available": True
+                },
                 "error": "No content extracted"
             }
         
