@@ -15,61 +15,126 @@ try:
     logger = logging.getLogger(__name__)
     logger.info("✅ Document routing available (with embeddings)")
 except (ImportError, RuntimeError) as e:
-    ROUTING_AVAILABLE = False
+    ROUTING_AVAILABLE = True
     logger = logging.getLogger(__name__)
-    logger.warning(f"⚠️  Document routing not available: {e}")
-    logger.info("   Install with: pip install sentence-transformers chromadb")
-    
-    # Fallback keyword-based routing
+    logger.info(f"ℹ️ Using Groq LLM for department routing (Serverless mode)")
+
     from department_corpus import DEPARTMENT_CORPUS
-    
+    import json
+
     def classify_text_to_department_with_confidence(text, top_k=3, tie_threshold=0.05):
-        """Fallback keyword-based department routing with confidence"""
+        """
+        High-accuracy LLM-based department classification fallback for Vercel/Serverless deployment.
+        Uses Groq API to analyze semantic context, avoiding the need for PyTorch/ChromaDB.
+        """
+        from model_summarizer import groq_generate
+
+        prompt = f"""
+You are an expert academic and technical document classifier for an engineering institution.
+
+Task: Classify the following document summary into the single most relevant department(s) from the list below.
+
+Available Departments:
+- CSE: Computer Science & Engineering (Software, AI, ML, Algorithms, Data Science, Databases, Web, Networks, Programming, Cyber Security)
+- EEE: Electrical & Electronics Engineering (Circuits, Power Systems, Electrical Machines, Power Electronics, Embedded Systems, Microcontrollers, Energy, Telecommunications)
+- MECH: Mechanical Engineering (Thermodynamics, Fluid Mechanics, CAD/CAM, Manufacturing, Robotics, Heat Transfer, HVAC, Machine Design, Automobiles)
+- CIVIL: Civil Engineering (Structural Engineering, Construction, Surveying, Concrete, Geotechnical, Transportation, Infrastructure, Dams, Bridges, Soil Mechanics)
+
+Rules:
+1. Identify the department that best matches the core domain of the text.
+2. Output strictly ONE department unless the text spans multiple domains with equal importance (max 2).
+3. Provide a confidence score between 0.0 and 1.0 based on clarity of domain match.
+
+Document Summary:
+{text}
+
+Respond STRICTLY in JSON format with no extra text or markdown formatting:
+{{
+  "primary_departments": ["CSE"],
+  "confidence": 0.92,
+  "is_tie": false
+}}
+"""
+        try:
+            raw_response = groq_generate(prompt, model="llama3-8b", temperature=0.1)
+            if raw_response:
+                clean_json = raw_response.strip()
+                if clean_json.startswith("```"):
+                    clean_json = clean_json.split("```")[1]
+                    if clean_json.startswith("json"):
+                        clean_json = clean_json[4:]
+                clean_json = clean_json.strip()
+
+                parsed = json.loads(clean_json)
+                depts = parsed.get("primary_departments", [])
+                conf = float(parsed.get("confidence", 0.85))
+
+                # Filter valid department codes only
+                valid_depts = [d for d in depts if d in DEPARTMENT_CORPUS]
+
+                if valid_depts:
+                    all_matches = []
+                    for code in valid_depts:
+                        dept_info = DEPARTMENT_CORPUS.get(code, {})
+                        all_matches.append({
+                            "department_code": code,
+                            "department_name": dept_info.get("department_name", code),
+                            "similarity_score": conf,
+                            "method": "groq_llm"
+                        })
+
+                    return {
+                        "primary_departments": valid_depts,
+                        "all_matches": all_matches,
+                        "confidence": conf,
+                        "is_tie": parsed.get("is_tie", len(valid_depts) > 1),
+                        "tie_threshold": tie_threshold
+                    }
+        except Exception as err:
+            logger.warning(f"Groq LLM classification fallback failed, using keyword matcher: {err}")
+
+        # Emergency Keyword Fallback if Groq call fails
         text_lower = text.lower()
         department_scores = {}
-        
+
         for dept_code, dept_data in DEPARTMENT_CORPUS.items():
             score = 0
             matched_keywords = []
-            
             for keyword in dept_data['keywords']:
                 if keyword.lower() in text_lower:
                     score += 1
                     matched_keywords.append(keyword)
-            
+
             if score > 0:
                 department_scores[dept_code] = {
                     'score': score,
                     'department_name': dept_data['department_name'],
                     'matched_keywords': matched_keywords
                 }
-        
-        # Sort by score (highest first)
+
         sorted_departments = sorted(
-            department_scores.items(), 
-            key=lambda x: x[1]['score'], 
+            department_scores.items(),
+            key=lambda x: x[1]['score'],
             reverse=True
         )
-        
-        # Handle ties for fallback
+
         if sorted_departments:
             primary_score = sorted_departments[0][1]['score']
             primary_departments = []
-            
             for dept_code, data in sorted_departments:
-                if (primary_score - data['score']) <= 0:  # Exact score match for ties
+                if (primary_score - data['score']) <= 0:
                     primary_departments.append(dept_code)
                 else:
                     break
-            
+
             return {
                 'primary_departments': primary_departments,
                 'all_matches': [{'department_code': code, **data} for code, data in sorted_departments],
-                'confidence': primary_score / len(dept_data['keywords']),  # Normalized confidence
+                'confidence': min(1.0, primary_score / 5.0),
                 'is_tie': len(primary_departments) > 1,
                 'tie_threshold': tie_threshold
             }
-        
+
         return {
             'primary_departments': [],
             'all_matches': [],
