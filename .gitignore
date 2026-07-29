@@ -4,7 +4,6 @@
 
 # ── Environment Variables & Secrets ───────────────────────────────────────────
 .env
-.env.*
 *.env
 .groq_api_key
 *api_key*
